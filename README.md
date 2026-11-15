@@ -1,8 +1,10 @@
 # OpeningTable: Chicago Restaurant Site Advisor
 
-Enter a budget and a restaurant type. For a given Chicago ZIP, OpeningTable estimates store size, startup cost, monthly P&L, payback period and risk for each block (H3 cell), with data sources attached.
+OpeningTable helps independent restaurants pick a site in Chicago.
 
-This document covers only **how to run, deploy, and fetch new data**. For model methodology and validation results, see [advantage/README.md](advantage/README.md). For product design, see [docs/](docs/).
+We download historical public data (Chicago business licenses, food inspections, population, LODES employment, CTA ridership, and an Overture restaurant snapshot), clean it and align it in time, and use it to train three models: a cuisine classifier, a license survival model and a supply gap model. The results are shown on a map. Enter a budget and a restaurant type, pick a ZIP, and each block (H3 cell) shows store size, startup cost, monthly P&L, payback period and risk, with data sources attached.
+
+This document covers **how to run and deploy** the project. For model methodology and validation results, see [advantage/README.md](advantage/README.md). For product design, see [docs/](docs/).
 
 ## 1. Repository layout
 
@@ -68,7 +70,7 @@ Render runs Docker with a persistent disk, so data and models survive redeploys.
    - a **Standard (2 GB RAM)** instance (training needs about 1.4 GB, so 512 MB fails)
    - a 5 GB disk at `/var/plategap`
    - an auto-generated `ADMIN_TOKEN`
-3. Under **Environment**, add `EXA_API_KEY`.
+3. (Optional) Under **Environment**, add `EXA_API_KEY`. Only needed to try the experimental live data feature in section 4.
 4. Open the service URL. The first start takes 3–5 minutes to download data and train. Check `https://<your-domain>/api/status` and wait for `"data_ready": true`.
 5. For weekly retraining, add two GitHub secrets under **Settings → Secrets and variables → Actions**:
    - `PLATEGAP_URL`: the service URL, e.g. `https://plategap.onrender.com`
@@ -85,12 +87,18 @@ docker build -t plategap .
 ```
 
 ```bash
-docker run -p 8000:8000 -v plategap-data:/var/plategap -e ADMIN_TOKEN=replace-with-a-random-string -e EXA_API_KEY=your-key plategap
+docker run -p 8000:8000 -v plategap-data:/var/plategap -e ADMIN_TOKEN=replace-with-a-random-string plategap
 ```
+
+To try section 4, also pass `-e EXA_API_KEY=your-key`.
 
 The frontend's basemap comes from CARTO (basemaps.cartocdn.com), so the browser needs internet access.
 
-## 4. Fetching new data (Exa)
+## 4. Live data with Exa (experimental)
+
+> **Status:** this feature doesn't work reliably yet. Web search results are noisy, and the rules can't extract data accurately. For example, a rent pattern like `$xx/SF` also matches sale prices and office listings. **None of the results shown in the app depend on it.** The core product runs entirely on the historical data and models described above.
+
+The pipeline and endpoints are in place for future work. The rest of this section explains how to try them.
 
 ### 4.1 Fetch one ZIP with one command
 
@@ -199,7 +207,7 @@ Operations that write to `output/` (first-start data preparation, retraining, ex
 | Variable | Default | Description |
 |---|---|---|
 | `ADMIN_TOKEN` | Empty (admin endpoints disabled) | Password for admin endpoints |
-| `EXA_API_KEY` | Empty | Exa search; without it, `/api/live/fetch` returns 400 |
+| `EXA_API_KEY` | Empty | Optional. Exa search for the experimental live data feature (section 4); without it, `/api/live/fetch` returns 400 |
 | `DATA_DIR` | `./data` | Location of raw data and live records; point to the persistent disk when deployed |
 | `OUTPUT_DIR` | `./output` | Location of models and exported data; point to the persistent disk when deployed |
 | `AUTO_BOOTSTRAP` | `1` | Whether to download and train automatically when no data exists; set to `0` to disable |
