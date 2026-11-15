@@ -45,6 +45,14 @@ export const RISK_RULE: Record<RiskAppetite, string> = {
   aggressive: 'P50 annual profit',
 }
 
+/** Optional facts about the operator / site. null or '' = not given: the survival model uses the ZIP average
+ *  of recent independent openings for that input. */
+export type OperatorInputs = {
+  priorLicenses: number | null // Chicago food licenses the operator held before
+  entity: boolean | null // registered as a company (LLC, Inc, Corp)
+  address: string // street address already in mind, e.g. "2121 N Clark St"
+}
+
 export type Inputs = {
   zip: string
   budgetMin: number
@@ -57,17 +65,32 @@ export type Inputs = {
   liquor: boolean
   dayparts: Daypart[]
   risk: RiskAppetite
+  operator: OperatorInputs
+}
+
+/** 1,000-day license survival for the ZIP (advantage/survival.py SiteSurvival via /api/survival, or the
+ *  exported ZIP default) and P(license still active) by month since opening. */
+export type SurvivalInfo = {
+  p: number
+  pZipDefault: number
+  curve: number[] // index = months since opening, 0..72
+  inputs: Record<string, { value: number; source: string; raw?: unknown; n_openings?: number }> | null
+  addressLookup: { normalized: string; food_licenses_seen: number; ended_last_5y: number; note: string } | null
+  source: 'api' | 'zip_default'
+  error: string | null // the user's inputs could not be applied (API unreachable)
 }
 
 export type CuisineStats = {
-  expected: number // restaurants the area should support (ring-2, ~300 m)
-  actual: number // restaurants open (ring-2)
-  opened12m: number
-  closed12m: number
-  closureRate3y: number
+  expected: number // restaurants of this type similar areas support (ring-2, ~300 m)
+  actual: number // restaurants open (ring-2, Overture)
+  opened12m: number // new licenses, last 12 months (Chicago Business Licenses)
+  closed12m: number // licenses that ended, last 12 months
+  closureRate1000d: number // share of 2018-22 openings nearby whose license did not reach 1,000 days (shrunk)
+  historyN: number // openings behind closureRate1000d within ~300 m
+  survivalModel1000d: number | null // model: P(new independent keeps license 1,000 days), ZIP level
 }
 
-/** One H3 resolution-10 block (~1 city block). All values are SAMPLE data. */
+/** One H3 resolution-10 block (~1 city block). Real data from advantage/export_web.py. */
 export type Block = {
   h3: string
   lat: number
@@ -75,18 +98,17 @@ export type Block = {
   zip: string
   commercial: number // 0..1 street-frontage / commercial activity score
   eligible: boolean
-  residents: number // ring-2
-  jobs: number // ring-2
-  medianIncome: number
-  incomePct: number // 0..100 citywide
-  age25to44: number // share
-  students: number // share
-  hotelRooms: number // ring-2
-  transitRiders: number // weekday L boardings within ~400 m
+  residents: number // ring-2 (LODES RAC scaled to ZIP population)
+  jobs: number // ring-2 (LODES WAC)
+  highWageShare: number | null // share of employed residents earning > $3,333/month (LODES RAC)
+  incomePct: number // 0..100 citywide percentile of highWageShare
+  age18to39: number | null // ZIP share aged 18-39
+  transitRiders: number // average weekday L entries within ~400 m (CTA)
   restaurants: number // all restaurants, ring-2
   cuisine: Record<Cuisine, CuisineStats>
-  rentPsf: number // $/sq ft/yr base rent
-  liquorMoratorium: boolean
+  rentPsf: number // $/sq ft/yr base rent (ZIP level)
+  rentKind: 'live' | 'survey' | 'fallback' // live listings, team survey, or citywide fallback
+  liquorMoratorium: boolean // block centre inside a dry precinct (City of Chicago, historical 2011 dataset)
   recentClosures: number // restaurant closures nearby, last 12 months (possible 2nd-gen spaces)
   sameAddressClosures: number
   street: { ns: string; ew: string; label: string; grid: string }
@@ -102,6 +124,10 @@ export type ZipInfo = {
 
 export type Range3 = [number, number, number] // low, mode, high (triangular)
 
+/** sourced: every figure read from a cited public source. partial: cited figures plus a stated derivation (note).
+ *  unsourced: no public source found; kept as a labelled assumption. */
+export type AssumptionStatus = 'sourced' | 'partial' | 'unsourced'
+
 export type Assumption = {
   key: string
   group: string
@@ -109,8 +135,10 @@ export type Assumption = {
   unit: string
   value: Range3
   source: string
+  url?: string
   date: string
-  verified: boolean
+  status: AssumptionStatus
+  note?: string // how the triangle follows from the cited figures
   edited?: boolean
 }
 
@@ -153,15 +181,17 @@ export type Plan = {
   payback: { p10: number; p50: number; p90: number } // months from opening; Infinity = not within horizon
   annualProfitP50: number
   noPaybackProb: number // share of draws that do not pay back within the horizon
+  licensedAtPayback: number // share of draws that pay back before their sampled license end (survival model)
   pnl: PnL // steady state, central values
   staff: StaffLine[]
   rentMonthly: number
-  flags: ('overrun_risk' | 'budget_headroom' | 'same_address_closures' | 'space_unconfirmed')[]
+  flags: ('over_budget' | 'overrun_risk' | 'budget_headroom' | 'same_address_closures' | 'space_unconfirmed')[]
   feasible: boolean
 }
 
 export type PlanDetail = Plan & {
   samples: number[] // payback months per draw (Infinity allowed)
+  closures: number[] // per draw: month the license ends, sampled from the survival model's curve (Infinity = beyond horizon)
   startupSamples: number[]
   fan: { p10: number; p50: number; p90: number }[] // cumulative cash position by month (0..horizon)
   sensitivity: { driver: string; low: number; high: number }[] // payback months at -10% / +10%
@@ -200,7 +230,9 @@ export type Report = {
     feasible: number
   }
   top: PlanDetail[]
+  topOverBudget: boolean // no plan fits the ceiling: top = the plans closest to the budget, simulated in full
   plans: Plan[] // every simulated plan (for the scatter)
+  survival: SurvivalInfo
   cheapest: Plan | null
   matrix: { block: Block; label: string; gaps: Record<Cuisine, number> }[]
   zipGaps: Record<Cuisine, number>

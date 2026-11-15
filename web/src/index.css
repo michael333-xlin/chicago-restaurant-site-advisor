@@ -308,7 +308,7 @@ h1, h2, h3, h4 { font-family: var(--display); letter-spacing: -0.02em; margin: 0
 .mc-canvas { width: 100%; }
 .mc-canvas canvas { display: block; }
 .mc-foot { font-size: 11px; text-align: center; margin-top: 2px; }
-.scenarios { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; }
+.scenarios { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 14px; }
 .sc { padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.02); }
 .sc span { display: block; font-size: 10.5px; color: var(--muted); }
 .sc b { font-family: var(--display); font-size: 20px; }
@@ -476,3 +476,13 @@ h1, h2, h3, h4 { font-family: var(--display); letter-spacing: -0.02em; margin: 0
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* real-data loading state */
+.loading-city { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(244, 239, 232, 0.7); font: 500 14px Inter, sans-serif; letter-spacing: 0.02em; }
+.report .sources { margin: 0 0 12px; padding-left: 18px; font-size: 13px; line-height: 1.55; color: rgba(244, 239, 232, 0.78); }
+.evidence a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Monte Carlo legend: payback colour vs license ending first (survival model) */
+.mc-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 11px; color: var(--muted); }
+.mc-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.mc-legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }

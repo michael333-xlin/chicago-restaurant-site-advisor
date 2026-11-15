@@ -1,0 +1,1891 @@
+{
+ "ticket": {
+  "by": "format",
+  "values": {
+   "quick_service": [
+    10,
+    13,
+    16
+   ],
+   "fast_casual": [
+    14,
+    17.5,
+    22
+   ],
+   "full_service": [
+    24,
+    32,
+    50
+   ],
+   "steakhouse_full_service": [
+    28,
+    69,
+    129
+   ]
+  },
+  "status": "partial",
+  "source": "Darden Restaurants (Form 10-K, FY ended May 25, 2025); Bloomin' Brands; The Cheesecake Factory Inc.",
+  "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+  "date": "2025-07",
+  "note": "Full service [24, 32, 50]: Olive Garden / Carrabba's $24-27, Cheesecake Factory $31.79, Seasons 52 ~$52 (10-K check per person). Steakhouse spans two segments: casual (LongHorn $28, Outback $29) and upscale (Ruth's Chris $104.50, Capital Grille $104, Fleming's $110, STK $129); low and high are those segment ends, the mode $69 is the midpoint of the two segment modes (a judgement, not a figure). Quick service and fast casual: no public per-guest check found (Toast median entree prices $13.32-14.31 only), so those two triangles are unsourced. The former x1.75 steakhouse and x0.92 fast-food multipliers had no source and were removed.",
+  "sources": [
+   {
+    "publisher": "Darden Restaurants (Form 10-K, FY ended May 25, 2025)",
+    "title": "Darden Restaurants Annual Report on Form 10-K fiscal 2025",
+    "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+    "date": "2025-07",
+    "figure": "FY2025 average check per person (total sales / entrees sold): Olive Garden ~$24.00; LongHorn Steakhouse ~$28.00; Cheddar's ~$19.00; Chuy's ~$19.50; Yard House ~$36.00; Seasons 52 ~$52.00; Bahama Breeze ~$35.00; Ruth's Chris ~$104.50; The Capital Grille ~$104.00; Eddie V's ~$123.00"
+   },
+   {
+    "publisher": "Bloomin' Brands",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1546417/000154641726000009/blmn-20251228.htm",
+    "date": "2026-02",
+    "figure": "Average check per person (U.S. company-owned, 2025): Outback Steakhouse $29; Carrabba's Italian Grill $27; Bonefish Grill $37; Fleming's Prime Steakhouse $110"
+   },
+   {
+    "publisher": "The Cheesecake Factory Inc.",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/887596/000110465926018643/cake-20251230x10k.htm",
+    "date": "2026-02",
+    "figure": "The average check for each customer ... was approximately $31.79 during fiscal 2025; North Italia: approximately $35.60 for lunch and approximately $45.21 for dinner"
+   },
+   {
+    "publisher": "The ONE Group Hospitality",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1399520/000110465926032065/stks-20251228x10k.htm",
+    "date": "2026-03",
+    "figure": "average domestic restaurant revenues and average check per person for owned and managed STK restaurants ... were $14.2 million and $129"
+   },
+   {
+    "publisher": "Toast (press release reprinted by StockTitan)",
+    "title": "Toast Launches Menu Price Monitor",
+    "url": "https://www.stocktitan.net/news/TOST/toast-launches-menu-price-monitor-offering-insights-into-restaurant-kxdw7zn57knb.html",
+    "date": "2025-05",
+    "figure": "April 2025 median menu prices across all Toast restaurant types: burgers $14.31, burritos $13.32, chicken wings $13.67, regular coffee $3.50, cold brew $5.40, beer $6.41"
+   }
+  ],
+  "status_by": {
+   "quick_service": "unsourced",
+   "fast_casual": "unsourced"
+  }
+ },
+ "auv": {
+  "by": "format",
+  "values": {
+   "quick_service": [
+    490000,
+    1240000,
+    2260000
+   ],
+   "fast_casual": [
+    960000,
+    1360000,
+    2830000
+   ],
+   "full_service": [
+    1000000,
+    1650000,
+    3900000
+   ]
+  },
+  "status": "partial",
+  "source": "QSR Magazine (reprinted on Yahoo Finance); U.S. Census Bureau via FRED; U.S. BLS QCEW open data",
+  "url": "https://finance.yahoo.com/small-business/articles/qsr-50-2026-top-50-121001353.html",
+  "date": "2026",
+  "note": "Census Service Annual Survey revenue / BLS QCEW establishment counts (2022): full-service mean = 424,412M / 257,560 = $1.65M; limited-service mean (QS+FC combined) = 367,222M / 257,969 = $1.42M (means include national chains; not inflated to 2025). QS: low = Subway $0.49M (lowest QSR 50 AUV), mode = $1.24M = 25th percentile of the 37 non-fast-casual QSR 50 chains (close to Census LS mean $1.42M), high = $2.26M = 75th percentile of those chains. FC (chains classed as FC: Chipotle, Panera, QDOBA, CAVA, Five Guys, Shake Shack, McAlister's, Jersey Mike's, Firehouse, Jimmy John's, Tropical Smoothie, Panda, Dave's Hot Chicken): low = Firehouse $0.96M (min), mode = Noodles company AUV $1.36M (sits between FC 25th pct $1.18M and median $1.87M), high = 75th pct $2.83M. FS: mode = Census mean $1.65M; high = Kura $3.9M (small-box FS chain; Darden casual brands $5.2-5.6M are big-box outliers); low $1.0M is the placeholder (no public source for a low-end FS volume). Steakhouse x1.7: within Darden, LongHorn/Olive Garden = 0.93x and Fine Dining/Olive Garden = 1.29x, so x1.7 is not supported. Top-chain lists overstate independent-restaurant volumes. The former x1.7 steakhouse AUV multiplier is not supported (LongHorn 0.93x Olive Garden, Darden Fine Dining 1.29x) and was removed. FS low end is the old placeholder.",
+  "sources": [
+   {
+    "publisher": "QSR Magazine (reprinted on Yahoo Finance)",
+    "title": "QSR 50 2026: Top 50 Fast-Food Chains, Ranked by Sales",
+    "url": "https://finance.yahoo.com/small-business/articles/qsr-50-2026-top-50-121001353.html",
+    "date": "2026",
+    "figure": "2025 average sales per unit ($000): McDonald's 4088, Wendy's 2001, Burger King 1660, Subway* 490, Domino's 1385, Pizza Hut 808, Jimmy John's 1000, Firehouse Subs 960, Jersey Mike's 1360, Chipotle 3104, Panera* 2611, CAVA 2934, QDOBA 1700, Five Guys 1531, Shake Shack* 4048, McAlister's 1868 (*estimated by QSR)"
+   },
+   {
+    "publisher": "U.S. Census Bureau via FRED",
+    "title": "Revenue for Full-Service Restaurants, All Establishments, Employer Firms (FRRAEEF2722511)",
+    "url": "https://fred.stlouisfed.org/series/FRRAEEF2722511",
+    "date": "2024-01",
+    "figure": "2022: 424,412 (millions of dollars)"
+   },
+   {
+    "publisher": "U.S. Census Bureau via FRED",
+    "title": "Revenue for Limited-Service Restaurants, All Establishments, Employer Firms (LRRAEEF2722513)",
+    "url": "https://fred.stlouisfed.org/series/LRRAEEF2722513",
+    "date": "2024-01",
+    "figure": "2022: 367,222 (millions of dollars)"
+   },
+   {
+    "publisher": "U.S. BLS QCEW open data",
+    "title": "2022 annual averages, NAICS 722511 and 722513, private ownership",
+    "url": "https://data.bls.gov/cew/data/api/2022/a/industry/722511.csv",
+    "date": "2022",
+    "figure": "US private establishments: 722511 = 257,560; 722513 = 257,969 (Cook County 4,268 and 4,252)"
+   },
+   {
+    "publisher": "Noodles & Company",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1275158/000127515826000021/ndls-20251230.htm",
+    "date": "2026-03",
+    "figure": "Company-owned: Average unit volumes $1,360 (thousands); restaurants typically between 2,000 and 2,600 square feet"
+   },
+   {
+    "publisher": "Darden Restaurants (Form 10-K, FY ended May 25, 2025)",
+    "title": "Darden Restaurants Annual Report on Form 10-K fiscal 2025",
+    "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+    "date": "2025-07",
+    "figure": "Average annual sales per restaurant FY2025 ($M): Olive Garden 5.6, LongHorn Steakhouse 5.2, Fine Dining 7.2, Other Business 5.8"
+   },
+   {
+    "publisher": "Kura Sushi USA",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1772177/000119312525269773/krus-20250831.htm",
+    "date": "2025-11",
+    "figure": "AUV was $3.9 million for fiscal year 2025"
+   },
+   {
+    "publisher": "GEN Restaurant Group",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1891856/000119312526134555/genk-20251231.htm",
+    "date": "2026-03",
+    "figure": "Average Unit Volume $5,068 (thousands) for 2025"
+   }
+  ]
+ },
+ "covers_var": {
+  "by": "none",
+  "values": {
+   "all": [
+    0.8,
+    1.0,
+    1.15
+   ]
+  },
+  "status": "unsourced",
+  "source": "Darden Restaurants (Form 10-K, FY ended May 25, 2025); Kura Sushi USA; Chipotle Mexican Grill",
+  "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+  "date": "2025-07",
+  "note": "No public unit-level dispersion found. Brand-level 2025 traffic changes span 0.93-1.03 (Brand-level year-over-year traffic changes from 11 brand/segment disclosures for 2025: sorted -6.9, -5.7, -5.2, -3.1, -2.9, -2.5, -2.4, -2.3, -1.8, +1.9, +2.8 (...), but those average hundreds of units, so a single restaurant varies more; using them would make the simulation over-confident. The wider range is kept and labelled as an assumption.",
+  "sources": [
+   {
+    "publisher": "Darden Restaurants (Form 10-K, FY ended May 25, 2025)",
+    "title": "Darden Restaurants Annual Report on Form 10-K fiscal 2025",
+    "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+    "date": "2025-07",
+    "figure": "FY2025 same-restaurant guest counts: Olive Garden -2.3%; LongHorn +1.9%; Fine Dining -5.2%; Other Business -2.4%"
+   },
+   {
+    "publisher": "Kura Sushi USA",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1772177/000119312525269773/krus-20250831.htm",
+    "date": "2025-11",
+    "figure": "Comparable restaurant sales decreased 1.3%, consisting of negative traffic of 3.1% and price/mix of 1.8%"
+   },
+   {
+    "publisher": "Chipotle Mexican Grill",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1058090/000105809026000009/cmg-20251231.htm",
+    "date": "2026-02",
+    "figure": "Comparable restaurant sales decreased 1.7% ... attributable to lower transactions of 2.9%"
+   },
+   {
+    "publisher": "Jack in the Box Inc.",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/807882/000080788225000072/jack-20250928.htm",
+    "date": "2025-11",
+    "figure": "Jack in the Box company same-store transactions (5.7)%; Del Taco transactions (6.9)%"
+   },
+   {
+    "publisher": "El Pollo Loco Holdings",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1606366/000160636626000017/loco-20251231x10k.htm",
+    "date": "2026-03",
+    "figure": "company-operated ... 2.1% increase in average check size ... partially offset by a 1.8% decrease in transactions"
+   },
+   {
+    "publisher": "Portillo's Inc.",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1871509/000187150926000012/ptlo-20251228.htm",
+    "date": "2026-02",
+    "figure": "same-restaurant sales decline was attributable to a 2.5% decrease in transactions, partially offset by an increase in average check of 2.0%"
+   },
+   {
+    "publisher": "BJ's Restaurants",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1013488/000119312526083331/bjri-20251230.htm",
+    "date": "2026-03",
+    "figure": "increase in guest traffic of approximately 2.8%, offset by an average check decrease of approximately 0.8%"
+   }
+  ]
+ },
+ "ramp_start": {
+  "by": "none",
+  "values": {
+   "all": [
+    0.55,
+    0.65,
+    0.75
+   ]
+  },
+  "status": "unsourced",
+  "source": "The Cheesecake Factory Inc.; Portillo's Inc.; Kura Sushi USA",
+  "url": "https://www.sec.gov/Archives/edgar/data/887596/000110465926018643/cake-20251230x10k.htm",
+  "date": "2026-02",
+  "note": "No public source quantifies month-1 revenue as a share of steady state for an independent restaurant. Chain disclosures point the other way for branded openings: Cheesecake Factory, Kura and Portillo's describe a honeymoon ABOVE run-rate (Portillo's Kennesaw averaged ~$314K/week over its first 7 weeks vs ~$175K/week implied by a $9.1M mature AUV, i.e. ~1.8x), while Chipotle says sales/profit ramp takes ~36 months. Values shown are the unchanged placeholder, NOT sourced.",
+  "sources": [
+   {
+    "publisher": "The Cheesecake Factory Inc.",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/887596/000110465926018643/cake-20251230x10k.htm",
+    "date": "2026-02",
+    "figure": "Our new restaurants have typically opened with initial sales volumes well in excess of their future run-rate levels. This initial 'honeymoon' effect ... During the three to six months following the opening ... sales volumes ... gradually adjust downward to their post-opening run-rate level."
+   },
+   {
+    "publisher": "Portillo's Inc.",
+    "title": "ICR Conference investor presentation (8-K Ex. 99.1)",
+    "url": "https://www.sec.gov/Archives/edgar/data/1871509/000187150926000003/exhibit991-ptloinvestorp.htm",
+    "date": "2026-01",
+    "figure": "Kennesaw, GA (opened November 14, 2025): $2.2M SALES IN THE FIRST 7 WEEKS; $302K LAST WEEK'S SALES; earliest new-market restaurants FY2025 sales average $9.1M"
+   },
+   {
+    "publisher": "Portillo's Inc.",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1871509/000187150926000012/ptlo-20251228.htm",
+    "date": "2026-02",
+    "figure": "Some of our restaurants have higher-than-normal sales volumes during the initial startup period"
+   },
+   {
+    "publisher": "Kura Sushi USA",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1772177/000119312525269773/krus-20250831.htm",
+    "date": "2025-11",
+    "figure": "We include restaurants in the comparable restaurant base that have been in operation for at least 18 full calendar months ... due to new restaurants experiencing a period of higher sales upon opening."
+   },
+   {
+    "publisher": "Chipotle Mexican Grill",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1058090/000105809026000009/cmg-20251231.htm",
+    "date": "2026-02",
+    "figure": "it can take around 36 months to ramp up the sales and profitability of a new restaurant"
+   }
+  ]
+ },
+ "ramp_months": {
+  "by": "none",
+  "values": {
+   "all": [
+    6,
+    18,
+    36
+   ]
+  },
+  "status": "partial",
+  "source": "The Cheesecake Factory Inc.; Chipotle Mexican Grill; Darden Restaurants (Form 10-K, FY ended May 25, 2025)",
+  "url": "https://www.sec.gov/Archives/edgar/data/887596/000110465926018643/cake-20251230x10k.htm",
+  "date": "2026-02",
+  "note": "low 6 = upper end of Cheesecake's 3-6 months for traffic to settle; mode 18 = median of comparable-base entry thresholds used to exclude new-unit distortion (Chipotle 13, Darden 16, Kura 18, GEN 18, Noodles 18, Portillo's 24 months); high 36 = Chipotle's ~36-month sales+profit ramp (BJ's cites 2-5 years for full maturity). Comp-base thresholds are a proxy, not a measured time-to-steady-state; placeholder [5,7,10] looks short versus every chain disclosure.",
+  "sources": [
+   {
+    "publisher": "The Cheesecake Factory Inc.",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/887596/000110465926018643/cake-20251230x10k.htm",
+    "date": "2026-02",
+    "figure": "During the three to six months following the opening of new restaurants, customer traffic has generally settled into its normal pattern"
+   },
+   {
+    "publisher": "Chipotle Mexican Grill",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1058090/000105809026000009/cmg-20251231.htm",
+    "date": "2026-02",
+    "figure": "it can take around 36 months to ramp up the sales and profitability of a new restaurant; comparable sales include restaurants in operation for at least 13 full calendar months"
+   },
+   {
+    "publisher": "Darden Restaurants (Form 10-K, FY ended May 25, 2025)",
+    "title": "Darden Restaurants Annual Report on Form 10-K fiscal 2025",
+    "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+    "date": "2025-07",
+    "figure": "Same-restaurant sales ... limited to restaurants that have been open, and operated by Darden, for at least 16 months"
+   },
+   {
+    "publisher": "Kura Sushi USA",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1772177/000119312525269773/krus-20250831.htm",
+    "date": "2025-11",
+    "figure": "comparable restaurant base ... at least 18 full calendar months ... due to new restaurants experiencing a period of higher sales upon opening"
+   },
+   {
+    "publisher": "Noodles & Company",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1275158/000127515826000021/ndls-20251230.htm",
+    "date": "2026-03",
+    "figure": "comparable restaurant base to include restaurants open for at least 18 full periods"
+   },
+   {
+    "publisher": "Portillo's Inc.",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1871509/000187150926000012/ptlo-20251228.htm",
+    "date": "2026-02",
+    "figure": "Our comparable restaurant base is defined as the number of restaurants open for at least 24 full fiscal periods"
+   },
+   {
+    "publisher": "BJ's Restaurants",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1013488/000119312526083331/bjri-20251230.htm",
+    "date": "2026-03",
+    "figure": "Maturation periods vary from restaurant to restaurant but generally range from two to five years"
+   }
+  ]
+ },
+ "turns": {
+  "by": "cuisine",
+  "values": {
+   "italian": [
+    1.4,
+    2.0,
+    2.7
+   ],
+   "fast_food": [
+    1.4,
+    2.0,
+    2.7
+   ],
+   "asian": [
+    1.4,
+    2.0,
+    2.7
+   ],
+   "steakhouse": [
+    1.0,
+    1.35,
+    1.8
+   ]
+  },
+  "status": "unsourced",
+  "source": "Darden Restaurants (Form 10-K, FY ended May 25, 2025)",
+  "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+  "date": "2025-07",
+  "note": "No public source separates turns from seat occupancy. Derived cross-check of the PRODUCT turns x occupancy (guests per seat per day = AUV / check / seats / 364): Olive Garden 5.6M/24/250/364 = 2.56; LongHorn 5.2M/28/180/364 = 2.83; Ruth's Chris (Fine Dining segment AUV) 7.2M/104.5/200/364 = 0.95; Capital Grille 7.2M/104/260/364 = 0.73. These include off-premise sales (Bloomin' reports 25% off-premise at Outback), so dine-in is lower (~1.9-2.1 for casual chains). Placeholder products: 2.0 x 0.68 = 1.36 (casual), 1.35 x 0.68 = 0.92 (steakhouse) are consistent with fine-dining steakhouses and below high-volume casual chains. Values shown are the unchanged placeholder.",
+  "sources": [
+   {
+    "publisher": "Darden Restaurants (Form 10-K, FY ended May 25, 2025)",
+    "title": "Darden Restaurants Annual Report on Form 10-K fiscal 2025",
+    "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+    "date": "2025-07",
+    "figure": "Pro-forma new restaurants: Olive Garden 7,700 sq ft / 250 dining seats; LongHorn 5,800 / 180; Ruth's Chris 7,400 / 200; The Capital Grille 9,000 / 260 (seats include bar dining and patio seats); AUV FY2025: Olive Garden $5.6M, LongHorn $5.2M, Fine Dining $7.2M; check per person $24 / $28 / $104.50 / $104"
+   }
+  ]
+ },
+ "occupancy": {
+  "by": "none",
+  "values": {
+   "all": [
+    0.55,
+    0.68,
+    0.8
+   ]
+  },
+  "status": "unsourced",
+  "source": "No public source found",
+  "url": null,
+  "date": "—",
+  "note": "No accessible public source found (Cornell CHR / Kimes revenue-management papers that report seat occupancy could not be fetched - rate limited). Only the product turns x occupancy can be cross-checked from public data (see 'turns'). Values shown are the unchanged placeholder.",
+  "sources": []
+ },
+ "throughput": {
+  "by": "format",
+  "values": {
+   "quick_service": [
+    0.19,
+    0.25,
+    0.31
+   ],
+   "fast_casual": [
+    0.09,
+    0.19,
+    0.23
+   ]
+  },
+  "status": "partial",
+  "source": "El Pollo Loco Holdings; Wingstop Inc.; Jack in the Box Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1606366/000160636626000017/loco-20251231x10k.htm",
+  "date": "2026-03",
+  "note": "throughput = (AUV / sq ft) / check / 360. QS (check $13 = ticket mode): El Pollo Loco 2.3M/2,600 = $885/sqft -> 0.19; Wingstop 2.0M/1,700 = $1,176 -> 0.25; Jack in the Box 1.97M/1,372 = $1,436 -> 0.31. FC (check $17.5): Noodles 1.36M/2,300 = $591 -> 0.094; CAVA 2.934M/2,500 = $1,174 -> 0.19; Portillo's 9.1M/6,250 = $1,456 -> 0.23. Caveats: checks are not disclosed by these chains (uses the model's unsourced QS/FC checks); AUVs include drive-thru/delivery sales that are not floor-limited, so these overstate dine-floor throughput; prototypes are chain buildings.",
+  "sources": [
+   {
+    "publisher": "El Pollo Loco Holdings",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1606366/000160636626000017/loco-20251231x10k.htm",
+    "date": "2026-03",
+    "figure": "A typical restaurant generally ranges from 2,200 to 3,000 square feet, with seating for approximately 50 to 70 people"
+   },
+   {
+    "publisher": "Wingstop Inc.",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1636222/000163622226000008/wing-20251227.htm",
+    "date": "2026-02",
+    "figure": "Our restaurants generally occupy approximately 1,700 square feet; digital sales accounted for 73.2% of system-wide sales (Q4 2025)"
+   },
+   {
+    "publisher": "Jack in the Box Inc.",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/807882/000080788225000072/jack-20250928.htm",
+    "date": "2025-11",
+    "figure": "The Jack in the Box restaurants are approximately 1,372 square feet"
+   },
+   {
+    "publisher": "CAVA Group",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1639438/000162828026011296/cava-20251228.htm",
+    "date": "2026-02",
+    "figure": "Our restaurants generally range from 2,000 to 3,000 square feet in size and seat approximately 30 to 60 guests indoors"
+   },
+   {
+    "publisher": "Noodles & Company",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1275158/000127515826000021/ndls-20251230.htm",
+    "date": "2026-03",
+    "figure": "Company-owned AUV $1,360K; restaurants typically between 2,000 and 2,600 square feet"
+   },
+   {
+    "publisher": "Portillo's Inc.",
+    "title": "ICR investor presentation",
+    "url": "https://www.sec.gov/Archives/edgar/data/1871509/000187150926000003/exhibit991-ptloinvestorp.htm",
+    "date": "2026-01",
+    "figure": "earliest new-market restaurants FY2025 average $9.1M; RoTF 1.0 prototype 6,250 sq ft (10-K); Drive-Thru ~39% of Sales"
+   },
+   {
+    "publisher": "QSR Magazine (Yahoo reprint)",
+    "title": "QSR 50 2026",
+    "url": "https://finance.yahoo.com/small-business/articles/qsr-50-2026-top-50-121001353.html",
+    "date": "2026",
+    "figure": "2025 AUV ($000): El Pollo Loco 2300, Wingstop 2000, Jack in the Box 1970, CAVA 2934"
+   }
+  ]
+ },
+ "sqft_seat": {
+  "by": "format",
+  "values": {
+   "quick_service": [
+    12,
+    13.5,
+    15
+   ],
+   "fast_casual": [
+    12,
+    13.5,
+    15
+   ],
+   "full_service": [
+    15,
+    17.5,
+    20
+   ]
+  },
+  "status": "sourced",
+  "source": "UpCodes (Chicago Building Code 2019, Chapter 10); Prestige 360 Design; Smart Restaurant Owner",
+  "url": "https://up.codes/viewer/chicago/chi-building-code-2019/chapter/10/means-of-egress",
+  "date": "2019",
+  "note": "QS/FC: both design guides give 12-15; low 12, high 15 (= the Chicago code's 15 net sq ft/occupant for tables-and-chairs; fixed booth seating is counted by seats, so denser layouts are possible), mode = midpoint 13.5. FS: guides give 15-18 and 15-20; low 15, high 20, mode 17.5. Fine dining would be 18-30. Design-guide figures are planning heuristics, not measurements.",
+  "sources": [
+   {
+    "publisher": "UpCodes (Chicago Building Code 2019, Chapter 10)",
+    "title": "Table 1004.5 Maximum floor area allowances per occupant",
+    "url": "https://up.codes/viewer/chicago/chi-building-code-2019/chapter/10/means-of-egress",
+    "date": "2019",
+    "figure": "Unconcentrated (tables and chairs): 15 net; Concentrated (chairs only-not fixed): 7 net; Kitchens and service areas, commercial: 200 gross"
+   },
+   {
+    "publisher": "Prestige 360 Design",
+    "title": "Restaurant Floor Plan and Layout Design: 2026 Texas Owner's Guide",
+    "url": "https://prestige360design.com/blog/restaurant-floor-plan-layout-design/",
+    "date": "2026-06",
+    "figure": "Fast casual / counter service: 12 to 15 sq ft; Full service / casual dining: 15 to 20 sq ft; Fine dining: 20 to 30 sq ft"
+   },
+   {
+    "publisher": "Smart Restaurant Owner",
+    "title": "Restaurant Floor Plan & Seating Capacity",
+    "url": "https://smartrestaurantowner.com/blog/restaurant-floor-plan-guide",
+    "date": "2026-07",
+    "figure": "Full-Service Restaurant 15-18; Fast-Casual 12-15; Fine Dining 18-22 sq ft per seat (dining room)"
+   }
+  ]
+ },
+ "dining_share": {
+  "by": "format",
+  "values": {
+   "quick_service": [
+    0.25,
+    0.5,
+    0.7
+   ],
+   "fast_casual": [
+    0.25,
+    0.5,
+    0.7
+   ],
+   "full_service": [
+    0.47,
+    0.57,
+    0.67
+   ]
+  },
+  "status": "partial",
+  "source": "Darden Restaurants (Form 10-K, FY ended May 25, 2025); Kura Sushi USA; Bloomin' Brands",
+  "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+  "date": "2025-07",
+  "note": "Implied share = sqft_seat mode / (total sq ft / seats). FS at 17.5 sq ft/seat: Olive Garden 30.8 -> 0.57, LongHorn 32.2 -> 0.54, Cheddar's 0.58, Chuy's 0.49, Yard House 0.64, Ruth's 0.47, Capital Grille 0.51, Seasons 52 0.54, Eddie V's 0.56, Kura 30.9 -> 0.57, Outback 26.3 -> 0.67, Texas Roadhouse 26.9 -> 0.65. FS triangle = min 0.47 / median ~0.57 / max 0.67, consistent with design guides 0.55-0.65. QS/FC at 13.5 sq ft/seat: CAVA 2,500/45 = 55.6 -> 0.24, El Pollo Loco 2,600/60 = 43 -> 0.31 (off-premise-heavy chain prototypes) vs design guides 0.65-0.70; low 0.25, high 0.70, mode 0.5 = midpoint (judgement between the two evidence types).",
+  "sources": [
+   {
+    "publisher": "Darden Restaurants (Form 10-K, FY ended May 25, 2025)",
+    "title": "Darden Restaurants Annual Report on Form 10-K fiscal 2025",
+    "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+    "date": "2025-07",
+    "figure": "Pro-forma sq ft (all space under the roof, incl. coolers) / dining seats (incl. bar dining and patio): Olive Garden 7,700/250; LongHorn 5,800/180; Cheddar's 6,300/210; Chuy's 5,700/160; Yard House 9,000/330; Ruth's Chris 7,400/200; Capital Grille 9,000/260; Seasons 52 7,400/230; Eddie V's 10,000/320"
+   },
+   {
+    "publisher": "Kura Sushi USA",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1772177/000119312525269773/krus-20250831.htm",
+    "date": "2025-11",
+    "figure": "Our restaurant size currently averages approximately 3,400 square feet ... average seating capacity of approximately 110 guests"
+   },
+   {
+    "publisher": "Bloomin' Brands",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1546417/000154641726000009/blmn-20251228.htm",
+    "date": "2026-02",
+    "figure": "Joey design consists of a freestanding building with approximately 5,000 square feet and seating for approximately 190 guests"
+   },
+   {
+    "publisher": "Texas Roadhouse",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1289460/000110465926021292/txrh-20251230x10k.htm",
+    "date": "2026-02",
+    "figure": "approximately 8,000 square feet with seating for approximately 270 to 325 guests"
+   },
+   {
+    "publisher": "CAVA Group",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1639438/000162828026011296/cava-20251228.htm",
+    "date": "2026-02",
+    "figure": "2,000 to 3,000 square feet ... seat approximately 30 to 60 guests indoors"
+   },
+   {
+    "publisher": "El Pollo Loco Holdings",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1606366/000160636626000017/loco-20251231x10k.htm",
+    "date": "2026-03",
+    "figure": "2,200 to 3,000 square feet, with seating for approximately 50 to 70 people"
+   },
+   {
+    "publisher": "Prestige 360 Design",
+    "title": "Restaurant Floor Plan and Layout Design",
+    "url": "https://prestige360design.com/blog/restaurant-floor-plan-layout-design/",
+    "date": "2026-06",
+    "figure": "Full service with on-site prep roughly 60/40; Fast casual with limited menu roughly 65/35; Fine dining can move toward 55/45 (FOH/BOH)"
+   },
+   {
+    "publisher": "Smart Restaurant Owner",
+    "title": "Restaurant Floor Plan & Seating Capacity",
+    "url": "https://smartrestaurantowner.com/blog/restaurant-floor-plan-guide",
+    "date": "2026-07",
+    "figure": "Dining room % of total: Full-Service 60-65%; Fast-Casual 65-70%; Fine Dining 55-60%"
+   }
+  ]
+ },
+ "food_cost": {
+  "by": "cuisine",
+  "values": {
+   "italian": [
+    0.24,
+    0.29,
+    0.34
+   ],
+   "steakhouse": [
+    0.32,
+    0.36,
+    0.41
+   ],
+   "fast_food": [
+    0.26,
+    0.31,
+    0.34
+   ],
+   "asian": [
+    0.28,
+    0.31,
+    0.35
+   ]
+  },
+  "status": "sourced",
+  "source": "National Restaurant Association; Darden Restaurants (Form 10-K, FY ended May 25, 2025); Texas Roadhouse",
+  "url": "https://restaurant.org/research-and-media/research/restaurant-economic-insights/analysis-commentary/restaurant-operators-kept-food-cost-ratios-in-check-in-2024/",
+  "date": "2025-09",
+  "note": "Computed ratios: Olive Garden 24.1%, LongHorn 41.1%, Darden Fine Dining 31.8%, Texas Roadhouse 35.1%, McDonald's 31.0%, Wendy's 31.8%, Jack 28.0%, Del Taco 25.9%, Chipotle 29.6%, Kura 28.6%, GEN 34.7%, Noble Roman's pizza 21.2% (+3.1% packaging = 24.3%). Italian: low 0.24 (Olive Garden / Noble Roman's incl. packaging), high 0.34 (NRA FS <$2M median 33.7%), mode 0.29 = midpoint. Steakhouse: low 0.32 (Darden Fine Dining 31.8%), mode 0.36 (Texas Roadhouse 35.1%, Q4-25 36.4% with beef inflation), high 0.41 (LongHorn 41.1%). Fast food: low 0.26 (Del Taco 25.9%), mode 0.31 (McDonald's 31.0 / Wendy's 31.8 / Chipotle 29.6), high 0.34 (NRA LS median 32.4% - half of operators are above; FS<$2M 33.7%). Asian: low 0.28 (Kura 28.6%), mode 0.31 (between Kura and NRA FS median 32.0%), high 0.35 (GEN 34.7%). Chain ratios benefit from purchasing scale; independents trend to the NRA medians.",
+  "sources": [
+   {
+    "publisher": "National Restaurant Association",
+    "title": "Restaurant operators kept food cost ratios in check in 2024",
+    "url": "https://restaurant.org/research-and-media/research/restaurant-economic-insights/analysis-commentary/restaurant-operators-kept-food-cost-ratios-in-check-in-2024/",
+    "date": "2025-09",
+    "figure": "limited-service: food and non-alcohol beverage costs represented a median of 32.4% of sales in 2024; fullservice: median of 32.0% of sales in 2024"
+   },
+   {
+    "publisher": "National Restaurant Association",
+    "title": "Higher volume restaurants reported lower food-cost ratios in 2024",
+    "url": "https://www.restaurant.org/research-and-media/research/restaurant-economic-insights/analysis-commentary/higher-volume-restaurants-reported-lower-food-cost-ratios-in-2024/",
+    "date": "2025-10",
+    "figure": "fullservice $2M+ in sales: median of 31.0%; under $2M: median of 33.7% of sales"
+   },
+   {
+    "publisher": "Darden Restaurants (Form 10-K, FY ended May 25, 2025)",
+    "title": "Darden Restaurants Annual Report on Form 10-K fiscal 2025",
+    "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+    "date": "2025-07",
+    "figure": "FY2025 segment table ($M): Olive Garden sales 5,212.9, food & beverage 1,253.8; LongHorn 3,025.5 / 1,244.6; Fine Dining (Ruth's Chris, Capital Grille, Eddie V's) 1,304.8 / 414.5"
+   },
+   {
+    "publisher": "Texas Roadhouse",
+    "title": "Q4 and fiscal 2025 results (8-K Ex. 99.1)",
+    "url": "https://www.sec.gov/Archives/edgar/data/1289460/000110465926017538/txrh-20260218xex99d1.htm",
+    "date": "2026-02",
+    "figure": "FY2025 restaurant and other sales $5,847,234K; food and beverage costs $2,049,687K"
+   },
+   {
+    "publisher": "McDonald's Corp.",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/mcd-20251231.htm",
+    "date": "2026-02",
+    "figure": "Sales by Company-owned and operated restaurants 9,690; Food & paper 3,006 ($M, 2025)"
+   },
+   {
+    "publisher": "The Wendy's Company",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/30697/000003069726000009/wen-20251228.htm",
+    "date": "2026-02",
+    "figure": "Cost of sales: Food and paper $291.6 31.8% (of company-operated sales, 2025)"
+   },
+   {
+    "publisher": "Jack in the Box Inc.",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/807882/000080788225000072/jack-20250928.htm",
+    "date": "2025-11",
+    "figure": "Jack in the Box: food and packaging costs ... 28.0% in 2025; Del Taco: 25.9% in 2025"
+   },
+   {
+    "publisher": "Chipotle Mexican Grill",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1058090/000105809026000009/cmg-20251231.htm",
+    "date": "2026-02",
+    "figure": "Food, beverage and packaging ... As a percentage of total revenue 29.6% (2025)"
+   },
+   {
+    "publisher": "Kura Sushi USA",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1772177/000119312525269773/krus-20250831.htm",
+    "date": "2025-11",
+    "figure": "As a percentage of sales, food and beverage costs decreased to 28.6% in fiscal year 2025"
+   },
+   {
+    "publisher": "GEN Restaurant Group (Korean BBQ)",
+    "title": "Fourth quarter and full year 2025 results (8-K Ex. 99.1)",
+    "url": "https://www.sec.gov/Archives/edgar/data/1891856/000119312526134491/genk-ex99_1.htm",
+    "date": "2026-03",
+    "figure": "Revenue $212.5 million for 2025; cost of goods sold $73,790K"
+   },
+   {
+    "publisher": "Noble Roman's (Craft Pizza & Pub)",
+    "title": "Form 10-K 2024",
+    "url": "https://www.sec.gov/Archives/edgar/data/709005/000165495425006725/nrom_10k.htm",
+    "date": "2025-06",
+    "figure": "Craft Pizza & Pub 2024: Cost of sales 1,814,627 = 21.2% of revenue; Packaging 3.1%"
+   }
+  ]
+ },
+ "utilities": {
+  "by": "none",
+  "values": {
+   "all": [
+    0.026,
+    0.04,
+    0.05
+   ]
+  },
+  "status": "partial",
+  "source": "EnergySense Resilience Center, University of Illinois System; RestaurantOwner.com (Kazazian Restaurant Numbers workbook, Part 1); Chipotle Mexican Grill",
+  "url": "https://energysense.uillinois.edu/restaurants/",
+  "date": "2020",
+  "note": "Energy alone 3-5% of operating costs (UIUC EnergySense; operating costs are ~90-97% of sales for these operators, so roughly the same share of sales); water/sewer/trash add a little. low 0.026 = RestaurantOwner sample P&L (weak, undated), mode 0.04 = midpoint of 3-5%, high 0.05. No current survey median is public (NRA 2025 Operations Data Abstract is paywalled).",
+  "sources": [
+   {
+    "publisher": "EnergySense Resilience Center, University of Illinois System",
+    "title": "Restaurants",
+    "url": "https://energysense.uillinois.edu/restaurants/",
+    "date": "2020",
+    "figure": "Typically, 3-5% of a restaurant's total operating costs are spent on energy."
+   },
+   {
+    "publisher": "RestaurantOwner.com (Kazazian Restaurant Numbers workbook, Part 1)",
+    "title": "Sample full-service P&L 'Bay Street Grill' (illustrative, undated)",
+    "url": "https://www.restaurantowner.com/RN_1.pdf",
+    "date": "undated",
+    "figure": "TOTAL SALES 1,600,563 100.0%; Utilities 41,256 2.6% (includes trash removal)"
+   },
+   {
+    "publisher": "Chipotle Mexican Grill",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1058090/000105809026000009/cmg-20251231.htm",
+    "date": "2026-02",
+    "figure": "Other operating costs 14.7% of revenue; increase partly from 0.2% of inflation in natural gas and electricity"
+   }
+  ]
+ },
+ "marketing": {
+  "by": "none",
+  "values": {
+   "all": [
+    0.006,
+    0.022,
+    0.04
+   ]
+  },
+  "status": "sourced",
+  "source": "Darden Restaurants (Form 10-K, FY ended May 25, 2025); Texas Roadhouse; Kura Sushi USA",
+  "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+  "date": "2025-07",
+  "note": "Ratios: LongHorn 0.31%, Texas Roadhouse 0.60%, Kura 0.92%, Portillo's 1.28%, Darden 1.4%, BJ's 2.18%, Olive Garden 2.43%, Noodles 2.99%, Chipotle 3.05%, ONE Group 3.45%, Wendy's system ad-fund 4.0%. low 0.006 (Texas Roadhouse), mode 0.022 (median of the 11 = BJ's 2.18%), high 0.04 (Wendy's franchise ad-fund contribution).",
+  "sources": [
+   {
+    "publisher": "Darden Restaurants (Form 10-K, FY ended May 25, 2025)",
+    "title": "Darden Restaurants Annual Report on Form 10-K fiscal 2025",
+    "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+    "date": "2025-07",
+    "figure": "FY2025 marketing ($M) / sales: Olive Garden 126.7 / 5,212.9; LongHorn 9.3 / 3,025.5; consolidated marketing expenses 1.4% of sales"
+   },
+   {
+    "publisher": "Texas Roadhouse",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1289460/000110465926021292/txrh-20251230x10k.htm",
+    "date": "2026-02",
+    "figure": "local restaurant area marketing ... and the company restaurant advertising expenses amounted to $35.1 million (2025)"
+   },
+   {
+    "publisher": "Kura Sushi USA",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1772177/000119312525269773/krus-20250831.htm",
+    "date": "2025-11",
+    "figure": "The Company incurred $2.6 million ... in advertising expenses for the fiscal year ended August 31, 2025; sales $282.8 million"
+   },
+   {
+    "publisher": "Portillo's Inc.",
+    "title": "Form 10-K fiscal 2025 / ICR presentation",
+    "url": "https://www.sec.gov/Archives/edgar/data/1871509/000187150926000012/ptlo-20251228.htm",
+    "date": "2026-02",
+    "figure": "Advertising and marketing expenses totaled $9.4 million (FY2025); FY2025 preliminary total revenue $732.1M (presentation)"
+   },
+   {
+    "publisher": "BJ's Restaurants",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1013488/000119312526083331/bjri-20251230.htm",
+    "date": "2026-03",
+    "figure": "Advertising costs for fiscal 2025 ... approximately $30.5 million; total revenues ... $1.40 billion"
+   },
+   {
+    "publisher": "Noodles & Company",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1275158/000127515826000021/ndls-20251230.htm",
+    "date": "2026-03",
+    "figure": "Advertising and marketing costs ... were $14.8 million (2025); Total revenue 495,089 ($000)"
+   },
+   {
+    "publisher": "Chipotle Mexican Grill",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1058090/000105809026000009/cmg-20251231.htm",
+    "date": "2026-02",
+    "figure": "Advertising, marketing and promotional costs ... totaled $364,160 (thousands) for 2025; total revenue $11,925.6M"
+   },
+   {
+    "publisher": "The ONE Group Hospitality",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1399520/000110465926032065/stks-20251228x10k.htm",
+    "date": "2026-03",
+    "figure": "Advertising expense was $27.8 million (2025); total revenue $805.7 million"
+   },
+   {
+    "publisher": "The Wendy's Company",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/30697/000003069726000009/wen-20251228.htm",
+    "date": "2026-02",
+    "figure": "contribution rate for U.S. restaurants was generally 3.5% of sales for national advertising and 0.5% of sales for local and regional advertising"
+   }
+  ]
+ },
+ "card_fees": {
+  "by": "none",
+  "values": {
+   "all": [
+    0.0265,
+    0.029,
+    0.036
+   ]
+  },
+  "status": "sourced",
+  "source": "Square; Stripe",
+  "url": "https://squareup.com/help/us/en/article/5068-what-are-square-s-fees",
+  "date": "2026",
+  "note": "Effective rate = pct + fixed/ticket (ticket = whole party's card transaction). low 0.0265 = Square Premium 2.4% + $0.15 on a $60 FS table check; mode 0.029 = Stripe Terminal 2.7% + $0.05 on a $25 check (Square Plus on $30 = 3.0%); high 0.036 = Square Free 2.6% + $0.15 on a $15 QS check. Online/app orders run higher (Square Free online on $25 = 4.5%). Toast's pricing page refused automated access, so Toast rates are not cited.",
+  "sources": [
+   {
+    "publisher": "Square",
+    "title": "What are Square's fees? (Help Center)",
+    "url": "https://squareup.com/help/us/en/article/5068-what-are-square-s-fees",
+    "date": "2026",
+    "figure": "Square Free: Tap, dip, or swipe 2.6% + 15c; Online or invoices 3.3% + 30c; Plus: 2.5% + 15c in person, 2.9% + 30c online; Premium: 2.4% + 15c in person; Manual entry 3.5% + 15c"
+   },
+   {
+    "publisher": "Stripe",
+    "title": "Pricing",
+    "url": "https://stripe.com/pricing",
+    "date": "2026",
+    "figure": "2.9% + 30c per successful transaction for domestic cards (online); Terminal 2.7% + 5c per successful transaction for domestic cards"
+   }
+  ]
+ },
+ "delivery_share": {
+  "by": "format",
+  "values": {
+   "quick_service": [
+    0.04,
+    0.09,
+    0.14
+   ],
+   "fast_casual": [
+    0.09,
+    0.16,
+    0.18
+   ],
+   "full_service": [
+    0.005,
+    0.05,
+    0.06
+   ]
+  },
+  "status": "partial",
+  "source": "National Restaurant Association (data: Circana/CREST); Chipotle Mexican Grill; Portillo's Inc.",
+  "url": "https://www.ncrla.org/wp-content/uploads/2025/08/Restaurant-OffPremises-Report.pdf",
+  "date": "2025-08",
+  "note": "QS: mode 0.09 = Circana LS delivery traffic share 2024; high 0.14 = El Pollo Loco digital+delivery 13.8% (upper bound for delivery at a drive-thru QS); low 0.04 = 2019 LS delivery share (low-adoption unit). FC: low 0.09 (LS average), mode 0.16 (Chipotle >16% of revenue), high 0.18 (Portillo's delivery+catering ~18%). FS: mode 0.05 = Circana FS delivery traffic share; FS delivery is ~1/6 of FS off-premise traffic (5/30), so high = Carrabba's 34% off-premise x 5/30 = 0.057 -> 0.06, low = Fleming's 3% x 5/30 = 0.005. Traffic shares understate sales shares if delivery orders are larger. Placeholder QS [0.15,0.25,0.35] looks too high against every source. Lows for QS/FS and the FS high rely on stated derivation rules, so status is partial.",
+  "sources": [
+   {
+    "publisher": "National Restaurant Association (data: Circana/CREST)",
+    "title": "Off-Premises Restaurant Trends 2025",
+    "url": "https://www.ncrla.org/wp-content/uploads/2025/08/Restaurant-OffPremises-Report.pdf",
+    "date": "2025-08",
+    "figure": "Off-premises share of total customer traffic, fullservice 2019/2024: total 19%/30%, takeout 16%/24%, drive-thru 1%/2%, delivery 2%/5%; limited-service: total 76%/83%, takeout 31%/31%, drive-thru 41%/43%, delivery 4%/9%"
+   },
+   {
+    "publisher": "Chipotle Mexican Grill",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1058090/000105809026000009/cmg-20251231.htm",
+    "date": "2026-02",
+    "figure": "Over 16% of our 2025 food and beverage revenue consisted of delivery orders for which we are reliant on third-party delivery companies"
+   },
+   {
+    "publisher": "Portillo's Inc.",
+    "title": "ICR investor presentation",
+    "url": "https://www.sec.gov/Archives/edgar/data/1871509/000187150926000003/exhibit991-ptloinvestorp.htm",
+    "date": "2026-01",
+    "figure": "Drive-Thru (~39% of Sales); Dine-In + Carry Out (~43% of Sales); Delivery + Catering (~18% of Sales)"
+   },
+   {
+    "publisher": "El Pollo Loco Holdings",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1606366/000160636626000017/loco-20251231x10k.htm",
+    "date": "2026-03",
+    "figure": "all digital and delivery orders including mobile, web orders, and excluding kiosks constituted 13.8% of our total sales mix"
+   },
+   {
+    "publisher": "Bloomin' Brands",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1546417/000154641726000009/blmn-20251228.htm",
+    "date": "2026-02",
+    "figure": "Off-premises sales 2025: Outback 25%, Carrabba's 34%, Bonefish 17%, Fleming's 3%"
+   },
+   {
+    "publisher": "The Cheesecake Factory Inc.",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/887596/000110465926018643/cake-20251230x10k.htm",
+    "date": "2026-02",
+    "figure": "off-premise consumption ... approximately 21% of The Cheesecake Factory restaurant sales; North Italia approximately 13%"
+   },
+   {
+    "publisher": "Texas Roadhouse",
+    "title": "Q4 and fiscal 2025 results",
+    "url": "https://www.sec.gov/Archives/edgar/data/1289460/000110465926017538/txrh-20260218xex99d1.htm",
+    "date": "2026-02",
+    "figure": "Average weekly sales at company restaurants were $161,918 of which $21,973 were to-go sales (13.6%)"
+   }
+  ]
+ },
+ "delivery_fee": {
+  "by": "none",
+  "values": {
+   "all": [
+    0.15,
+    0.25,
+    0.3
+   ]
+  },
+  "status": "sourced",
+  "source": "DoorDash; Uber Eats; Restaurant Dive",
+  "url": "https://merchants.doordash.com/en-us/pricing",
+  "date": "2026",
+  "note": "low 0.15 = DoorDash Basic; mode 0.25 = DoorDash Plus / Uber Eats Plus (middle tier on both platforms); high 0.30 = DoorDash Premier / Uber Eats Premium. Commission includes card processing on platform orders (DoorDash), so do not also apply card_fees to delivery sales.",
+  "sources": [
+   {
+    "publisher": "DoorDash",
+    "title": "DoorDash Merchant Fees & Pricing",
+    "url": "https://merchants.doordash.com/en-us/pricing",
+    "date": "2026",
+    "figure": "Delivery commission: Basic 15%, Plus 25%, Premier 30%; Pickup 6% on every plan; commission covers credit card processing"
+   },
+   {
+    "publisher": "Uber Eats",
+    "title": "Pricing That Works for Your Business",
+    "url": "https://merchants.ubereats.com/us/en/pricing/",
+    "date": "2026",
+    "figure": "Lite 20%, Plus 25%, Premium 30% marketplace fee; pickup 7% with validated in-store pricing (10% without); Lite fees lower in some cities (15%); fees may differ depending on applicable regulations"
+   },
+   {
+    "publisher": "Restaurant Dive",
+    "title": "Uber Eats raises marketplace fees",
+    "url": "https://www.restaurantdive.com/news/uber-eats-increases-marketplace-fees/814294/",
+    "date": "2026-03",
+    "figure": "Lite tier rising from 15% to 20%; Plus 25% unchanged (Uber One orders 30%); Premium unchanged at 30%"
+   }
+  ]
+ },
+ "repairs": {
+  "by": "none",
+  "values": {
+   "all": [
+    0.01,
+    0.015,
+    0.02
+   ]
+  },
+  "status": "unsourced",
+  "source": "RestaurantOwner.com (Kazazian Restaurant Numbers workbook, Part 1)",
+  "url": "https://www.restaurantowner.com/RN_1.pdf",
+  "date": "undated",
+  "note": "No current public benchmark found; public chains bundle R&M into 'other operating' lines (Texas Roadhouse, BJ's, CAVA, Kura). The only figure found is one undated illustrative P&L at 0.6%. Values shown are the unchanged placeholder.",
+  "sources": [
+   {
+    "publisher": "RestaurantOwner.com (Kazazian Restaurant Numbers workbook, Part 1)",
+    "title": "Sample full-service P&L (illustrative, undated)",
+    "url": "https://www.restaurantowner.com/RN_1.pdf",
+    "date": "undated",
+    "figure": "Repairs & Maintenance 8,833 0.6% (Building repairs 0.2%, Equipment repairs 0.3%) on TOTAL SALES 1,600,563"
+   }
+  ]
+ },
+ "other_opex": {
+  "by": "none",
+  "values": {
+   "all": [
+    0.03,
+    0.045,
+    0.063
+   ]
+  },
+  "status": "partial",
+  "source": "RestaurantOwner.com (Kazazian Restaurant Numbers workbook, Part 1); Kura Sushi USA; Chipotle Mexican Grill",
+  "url": "https://www.restaurantowner.com/RN_1.pdf",
+  "date": "undated",
+  "note": "high 0.063 = sample P&L direct operating 4.4% + G&A excluding card fees (3.6-1.7 = 1.9%) (weak, undated). low/mode are the placeholder (unsourced). Aggregate cross-check: chains' all-in 'other operating' buckets (card fees + utilities + marketing + R&M + supplies + delivery fees) are 14.5% (Kura), 14.7% (Chipotle), 20.4% (Noodles); the model's modes utilities 4.0 + marketing 2.2 + card ~2.6 (2.9% x ~90% card share) + repairs 1.5 + other 4.5 = ~14.8% before delivery commissions, consistent with that range.",
+  "sources": [
+   {
+    "publisher": "RestaurantOwner.com (Kazazian Restaurant Numbers workbook, Part 1)",
+    "title": "Sample full-service P&L (illustrative, undated)",
+    "url": "https://www.restaurantowner.com/RN_1.pdf",
+    "date": "undated",
+    "figure": "Direct Operating Expenses 70,941 4.4%; General & Administrative 57,943 3.6% (of which Credit card charges 26,889 1.7%)"
+   },
+   {
+    "publisher": "Kura Sushi USA",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1772177/000119312525269773/krus-20250831.htm",
+    "date": "2025-11",
+    "figure": "Other costs include credit card processing fees, repairs and maintenance, restaurant-level advertising and promotions, restaurant supplies, royalty payments to Kura Japan, utilities ... other costs ... 14.5% in fiscal year 2025"
+   },
+   {
+    "publisher": "Chipotle Mexican Grill",
+    "title": "Form 10-K 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1058090/000105809026000009/cmg-20251231.htm",
+    "date": "2026-02",
+    "figure": "Other operating costs $1,755.8M ... As a percentage of total revenue 14.7%"
+   },
+   {
+    "publisher": "Noodles & Company",
+    "title": "Form 10-K fiscal 2025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1275158/000127515826000021/ndls-20251230.htm",
+    "date": "2026-03",
+    "figure": "other restaurant operating costs increased to 20.4% in 2025 ... 0.5% impact from higher delivery fees ... 0.3% from increased marketing spend"
+   }
+  ]
+ },
+ "insurance": {
+  "by": "none",
+  "values": {
+   "all": [
+    380,
+    500,
+    1700
+   ]
+  },
+  "status": "partial",
+  "source": "Insureon",
+  "url": "https://www.insureon.com/food-business-insurance/restaurants/cost",
+  "date": "2026-09",
+  "note": "low 380 = Insureon fast-food BOP 277 + workers' comp 103; mode 500 = Insureon restaurant BOP 337 + workers' comp 118 + liquor 45 (GL is normally inside the BOP, so not added). These come from very small policyholders (<5 employees), and workers' comp scales with payroll, so a 15-30-employee Chicago unit will cost more. high 1700 is the placeholder, NOT sourced; no public cost data for larger restaurants or Illinois-specific WC rates was found.",
+  "sources": [
+   {
+    "publisher": "Insureon",
+    "title": "Restaurant Insurance Costs",
+    "url": "https://www.insureon.com/food-business-insurance/restaurants/cost",
+    "date": "2026-09",
+    "figure": "BOP $337 per month ($4,045 annually); general liability $192/mo; workers' compensation $118/mo ($1,415 annually); liquor liability $45/mo; cyber $129/mo. Customers mostly have fewer than five employees and revenue ~$50,000 to >$200,000"
+   },
+   {
+    "publisher": "Insureon",
+    "title": "Fast Food Restaurant Insurance Costs",
+    "url": "https://www.insureon.com/food-business-insurance/fast-food-restaurants/cost",
+    "date": "2026-09",
+    "figure": "BOP $277 per month ($3,328 annually); general liability $139/mo; workers' compensation $103/mo ($1,242 annually)"
+   }
+  ]
+ },
+ "labor_intensity": {
+  "by": "cuisine",
+  "values": {
+   "italian": [
+    1.0,
+    1.1,
+    1.15
+   ],
+   "steakhouse": [
+    0.85,
+    0.95,
+    1.1
+   ],
+   "fast_food": [
+    0.9,
+    1.0,
+    1.1
+   ],
+   "asian": [
+    0.95,
+    1.0,
+    1.1
+   ]
+  },
+  "status": "partial",
+  "source": "Darden Restaurants (SEC Form 10-K, FY ended 2025-05-25); Texas Roadhouse, Inc.; Kura Sushi USA (FY2025 results release, via Yahoo Finance)",
+  "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+  "date": "2025-07",
+  "note": "Labor as % of sales from public filings (labor lines include wages, payroll taxes and benefits). Full-service peer mean = (OG 34.95 + LongHorn 25.80 + Fine Dining 28.18 + TXRH 33.25 + Kura 32.89 + GEN 30.56)/6 = 30.9%. Italian: Olive Garden 34.95% = 1.10x Darden avg (31.7%) and 1.13x peer mean -> mode 1.10, high 1.15, low 1.0. Steakhouse: LongHorn 0.83x, Fine Dining 0.91x, TXRH 1.07x of peer mean -> [0.85,0.95,1.1]. Cross-check in labor $/sq ft (labor% x AUV / prototype sf): OG ~$254/sf, LongHorn ~$231/sf (0.91x OG), Fine Dining ~$203-274/sf depending on brand size -> steakhouse is NOT more labor-intensive per sq ft than Italian; the placeholder 1.4 is not supported. Asian: Kura 1.06x, GEN 0.99x -> [0.95,1.0,1.1] (both atypical: conveyor sushi, grill-at-table KBBQ). Fast food: Wendy's 32.4% is the QSR template itself (1.0 by construction); no second verified QSR figure, so spread kept at placeholder. Caveats: chain data, large prototypes, % of sales is depressed by high check averages (steakhouses); if the model applies the multiplier to hours rather than dollars, use the $/sf cross-check.",
+  "sources": [
+   {
+    "publisher": "Darden Restaurants (SEC Form 10-K, FY ended 2025-05-25)",
+    "title": "Darden Restaurants FY2025 Annual Report on Form 10-K, Note: segment information",
+    "url": "https://s27.q4cdn.com/308865545/files/doc_financials/2025/q4/bccfb682-d6d4-4127-a13e-405c4764a844.pdf",
+    "date": "2025-07",
+    "figure": "Segment table FY2025 ($M): Olive Garden sales 5,212.9 / restaurant labor 1,822.1 (34.95%); LongHorn Steakhouse 3,025.5 / 780.7 (25.80%); Fine Dining (Ruth's Chris, Capital Grille, Eddie V's) 1,304.8 / 367.7 (28.18%); consolidated restaurant labor 31.7% of sales. Average annual sales per restaurant: OG $5.6M, LongHorn $5.2M, Fine Dining $7.2M. Prototype size/seats: OG 7,700 sf/250 seats, LongHorn 5,800/180, Ruth's 7,400/200, Capital Grille 9,000/260, Eddie V's 10,000/320."
+   },
+   {
+    "publisher": "Texas Roadhouse, Inc.",
+    "title": "Texas Roadhouse, Inc. Announces Fourth Quarter 2025 Results (earnings release)",
+    "url": "https://s206.q4cdn.com/953769211/files/doc_earnings/2025/q4/earnings-result/TXRH-2025-Q4-Earnings-Release-Final.pdf",
+    "date": "2026-02",
+    "figure": "FY2025 (52 weeks, $000): Restaurant and other sales 5,847,234; Labor 1,944,416 (=33.25%); Q4 labor 33.2% vs 33.0%; FY average weekly sales $161,918."
+   },
+   {
+    "publisher": "Kura Sushi USA (FY2025 results release, via Yahoo Finance)",
+    "title": "Kura Sushi USA Announces Fiscal Fourth Quarter and Fiscal Year 2025 Financial Results",
+    "url": "https://finance.yahoo.com/news/kura-sushi-usa-announces-fiscal-210500296.html",
+    "date": "2025-11",
+    "figure": "FY2025: sales $282,763K; labor and related costs $93,014K (=32.9%); 79 restaurants; AUV $3.947M."
+   },
+   {
+    "publisher": "GEN Restaurant Group (8-K FY2025 release, via StockTitan)",
+    "title": "GEN Restaurant Group reports FY2025 results",
+    "url": "https://www.stocktitan.net/sec-filings/GENK/8-k-gen-restaurant-group-inc-reports-material-event-d89180ee3e03.html",
+    "date": "2026-03",
+    "figure": "FY2025 revenue $212.5M; payroll and benefits $64,943K (=30.6% of revenue); 57 restaurants."
+   },
+   {
+    "publisher": "The Wendy's Company (Form 10-K FY2025)",
+    "title": "Form 10-K, fiscal year ended Dec 28, 2025 - company-operated cost of sales",
+    "url": "https://s1.q4cdn.com/202642389/files/doc_financials/2025/q4/TWC-10K-2025-AS-FILED-with-Exhibits.pdf",
+    "date": "2026-02",
+    "figure": "Company-operated restaurants: Restaurant labor $296.9M = 32.4% of sales (2024: 32.2%)."
+   }
+  ]
+ },
+ "payroll_tax": {
+  "by": "none",
+  "values": {
+   "all": [
+    0.11,
+    0.16,
+    0.24
+   ]
+  },
+  "status": "sourced",
+  "source": "Internal Revenue Service; Illinois Department of Employment Security; U.S. Bureau of Labor Statistics",
+  "url": "https://www.irs.gov/taxtopics/tc751",
+  "date": "2026",
+  "note": "Bottom-up statutory cost for a Chicago hourly worker: FICA 7.65% + FUTA 0.6%x$7,000 + IL SUTA 3.35%x$14,250 = 9.1% of wages at $35k/yr (cook at $19.45 x 1,800 h) and 11.1% at $15k/yr (part-time). Low 0.11 = ECEC legally required benefits for accommodation & food services ($1.82/$16.18 = 11.2% of wages, includes workers' comp). Mode 0.16 = 11.2% + Chicago mandatory paid leave/sick leave (80 h / 2,080 h = 3.8% of wages for a full-time worker who uses it) + small insurance. High 0.24 = ECEC total benefits $3.85/$16.18 = 23.8% of wages (adds health insurance 5.3%, retirement 1.5%, paid leave and supplemental pay). Placeholder [0.12,0.15,0.18] understates the high end if the operator offers health insurance. Illinois restaurant workers' comp rate itself was not found in a primary source.",
+  "sources": [
+   {
+    "publisher": "Internal Revenue Service",
+    "title": "Topic no. 751, Social Security and Medicare withholding rates",
+    "url": "https://www.irs.gov/taxtopics/tc751",
+    "date": "2026",
+    "figure": "'The current tax rate for Social Security is 6.2% for the employer'; 'The current rate for Medicare is 1.45% for the employer'; 2026 wage base $184,500."
+   },
+   {
+    "publisher": "Internal Revenue Service",
+    "title": "Topic no. 759, Form 940 - Employer's Annual Federal Unemployment (FUTA) Tax Return",
+    "url": "https://www.irs.gov/taxtopics/tc759",
+    "date": "2026",
+    "figure": "FUTA 6.0% on first $7,000; credit up to 5.4%; 'the FUTA tax rate after credit is 0.6%'."
+   },
+   {
+    "publisher": "Illinois Department of Employment Security",
+    "title": "EA-50 (11/2025) 2026 State Experience Factor and Employers' UI Contribution Rates",
+    "url": "https://ides.illinois.gov/content/dam/soi/en/web/ides/ides_forms_and_publications/EA-50_2026.pdf",
+    "date": "2025-11",
+    "figure": "Most new employers pay entry rate of 3.350% (includes 0.550% fund building rate); 2026 min 0.750%, max 7.050%; 'Only the first $14,250 of wages paid to a worker in the calendar year 2026 are subject to the payment of contributions.'"
+   },
+   {
+    "publisher": "Illinois Department of Employment Security",
+    "title": "2026 Historical Rate Chart",
+    "url": "https://ides.illinois.gov/content/dam/soi/en/web/ides/ides_forms_and_publications/UI_tax_rates_2026.pdf",
+    "date": "2025-11",
+    "figure": "Standard (new employer) rate 2025 3.650%, 2026 3.350%; wage base 2025 $13,916, 2026 $14,250."
+   },
+   {
+    "publisher": "U.S. Bureau of Labor Statistics",
+    "title": "Employer Costs for Employee Compensation, Table 4 (private industry by occupational and industry group), June 2026",
+    "url": "https://www.bls.gov/news.release/ecec.t04.htm",
+    "date": "2026-09",
+    "figure": "Accommodation and food services: total compensation $20.03; wages $16.18 (80.8%); total benefits $3.85 (19.2%); insurance $0.86; retirement $0.25; legally required benefits $1.82 (9.1%)."
+   },
+   {
+    "publisher": "City of Chicago, BACP",
+    "title": "Paid Leave and Paid Sick Leave",
+    "url": "https://www.chicago.gov/city/en/depts/bacp/supp_info/paidsickleaveinfo.html",
+    "date": "2026",
+    "figure": "'For every 35 hours worked, employees accrue one hour of paid leave and one hour of paid sick leave' (each capped at 40 hours per 12 months per City overview)."
+   }
+  ]
+ },
+ "rent_var": {
+  "by": "none",
+  "values": {
+   "all": [
+    0.75,
+    1.0,
+    1.25
+   ]
+  },
+  "status": "partial",
+  "source": "2nd Gen Kitchens; PepperLot; Matthews Real Estate Investment Services",
+  "url": "https://2ndgenkitchens.com/chicago-restaurant-space-for-lease",
+  "date": "2026-Q1",
+  "note": "Within-neighborhood spread of quoted ranges relative to their midpoint: 2nd Gen Kitchens ranges average about 0.75x to 1.25x of midpoint (e.g. River North 48/66.5=0.72, 85/66.5=1.28; Lincoln Park 0.78/1.22); PepperLot ranges average 0.81x to 1.19x. Triangle endpoints [0.75,1.0,1.25] follow; mode 1.0 assumes an unbiased model. Note the two sites' levels disagree by up to ~40% for the same neighborhood (West Loop $45-75 vs $70-95), so model-level bias may exceed within-submarket spread. Ranges are broker/marketplace estimates, not statistical percentiles.",
+  "sources": [
+   {
+    "publisher": "2nd Gen Kitchens",
+    "title": "Restaurant Space for Lease Chicago - Lease Rates by Chicago Neighborhood (Q1 2026, base rent)",
+    "url": "https://2ndgenkitchens.com/chicago-restaurant-space-for-lease",
+    "date": "2026-Q1",
+    "figure": "$/sf/yr: River North/Gold Coast $48-85; West Loop/Fulton Market $45-75; Lincoln Park/Lakeview $35-55; Wicker Park/Bucktown $32-50; Logan Square/Avondale $22-38; Pilsen/Bridgeport $18-32; Andersonville/Edgewater $24-40; Bronzeville/Hyde Park $18-30; Rogers Park $15-26."
+   },
+   {
+    "publisher": "PepperLot",
+    "title": "Chicago, IL Restaurants for Lease (market commentary + listings)",
+    "url": "https://pepperlot.com/chicago-restaurant-space-for-lease",
+    "date": "2026-11",
+    "figure": "Citywide restaurant lease rates about $35-95/sf/yr; West Loop/Fulton Market $70-95; Lincoln Park/Lakeview $55-80; Wicker Park/Bucktown $50-75; Logan Square, Pilsen, Avondale $35-55. Listings: 1450 W Webster (Lincoln Park, 2nd gen) $39/sf NNN; 2414 N Lincoln (Lincoln Park corner) $65/sf; 3215 N Sheffield (Lakeview, 2nd gen) $32/sf NNN; 3356 N Sheffield (Lakeview) $59/sf gross."
+   },
+   {
+    "publisher": "Matthews Real Estate Investment Services",
+    "title": "Chicago, IL Retail Market Report Q3 2026",
+    "url": "https://www.matthews.com/insights/chicago-retail-q3-2026",
+    "date": "2026-10",
+    "figure": "Metro asking rent $22.79/sf (+2.6% YoY, record); vacancy 5.0%. No submarket rent table published."
+   }
+  ]
+ },
+ "nnn": {
+  "by": "none",
+  "values": {
+   "all": [
+    8,
+    12,
+    18
+   ]
+  },
+  "status": "partial",
+  "source": "PepperLot; Plus Commercial Real Estate; 2nd Gen Kitchens",
+  "url": "https://pepperlot.com/chicago-restaurant-space-for-lease",
+  "date": "2026-11",
+  "note": "Low 8 = bottom of PepperLot and Plus CRE ranges; mode 12 = midpoint of the two Chicago listing estimates ($9.50, $13.92 -> $11.7) and close to Plus CRE component midpoints (7+1.5+4.5 = $13); high 18 = top of PepperLot neighborhood range (downtown CAM alone reaches $18-24, so Loop/Mag Mile sites can exceed this). Cross-check: 20-30% of $35-60 base rent = $7-18. Placeholder [7,9,12] is low.",
+  "sources": [
+   {
+    "publisher": "PepperLot",
+    "title": "Chicago, IL Restaurants for Lease",
+    "url": "https://pepperlot.com/chicago-restaurant-space-for-lease",
+    "date": "2026-11",
+    "figure": "Most Chicago restaurant leases are NNN; 'NNN and CAM charges typically add about $8 to $18/SF/year'."
+   },
+   {
+    "publisher": "PepperLot",
+    "title": "Listing: Brand New Retail Space in West Loop/Fulton Market, 629 W Lake St (warm shell, 1,231 sf)",
+    "url": "https://pepperlot.com/property/brand-new-retail-space-in-west-loopfulton-market-d6375d9c",
+    "date": "2026-11",
+    "figure": "Base rent $49/SF/yr NNN; 'NNN estimate $9.50/SF/yr'."
+   },
+   {
+    "publisher": "PepperLot",
+    "title": "Listing: Multi-Use Full Restaurant, 2114 W Lawrence Ave (2nd gen, 1,000 sf)",
+    "url": "https://pepperlot.com/property/multi-use-full-restaurant-for-lease-in-chicago-il-19b204a3",
+    "date": "2026-11",
+    "figure": "Base rent $3.33/SF/mo NNN; 'NNN estimate $1.16/SF/mo' (= $13.92/sf/yr)."
+   },
+   {
+    "publisher": "Plus Commercial Real Estate",
+    "title": "Understanding CAM Charges and NNN Leases in Chicago (2026 Guide)",
+    "url": "https://www.plus-cre.com/insights/understanding-cam-charges-and-nnn-leases-in-chicago-what-commercial-tenants-overlook-2026-guide",
+    "date": "2026-10",
+    "figure": "'CAM charges and NNN leases in Chicago can add $8 to $22 per square foot'; retail CAM Downtown Chicago $18-24, Naperville $12-18; suburban components: real estate taxes $5-9, insurance $1-2, maintenance/utilities $3-6 per sf/yr."
+   },
+   {
+    "publisher": "2nd Gen Kitchens",
+    "title": "Restaurant Space for Lease Chicago",
+    "url": "https://2ndgenkitchens.com/chicago-restaurant-space-for-lease",
+    "date": "2026-Q1",
+    "figure": "'budget an additional 20-30% on top of base rent' for taxes, insurance and CAM."
+   }
+  ]
+ },
+ "deposit_months": {
+  "by": "none",
+  "values": {
+   "all": [
+    1,
+    2,
+    6
+   ]
+  },
+  "status": "partial",
+  "source": "Square; Katalyst; Hungry Howie's (2025 FDD Item 7)",
+  "url": "https://squareup.com/us/en/the-bottom-line/starting-your-business/restaurant-start-up-costs",
+  "date": "2026-03",
+  "note": "Low 1 (franchise FDD assumption, low end of Square/Katalyst); mode 2 (Katalyst upper typical, Square midpoint); high 6 (Occupier's 3-6 month ceiling for restaurant tenants; applies to unproven independent operators). No Chicago-specific survey found.",
+  "sources": [
+   {
+    "publisher": "Square",
+    "title": "How Much Does it Cost to Open a Restaurant?",
+    "url": "https://squareup.com/us/en/the-bottom-line/starting-your-business/restaurant-start-up-costs",
+    "date": "2026-03",
+    "figure": "Security deposit 'usually 1-3 months' rent'."
+   },
+   {
+    "publisher": "Katalyst",
+    "title": "What it really costs to open a restaurant in 2026",
+    "url": "https://www.katalystos.com/blog/how-much-does-it-cost-to-open-a-restaurant-in-2026",
+    "date": "2026-06",
+    "figure": "Security deposit 'commonly one to two months' rent, more if financials are thin'."
+   },
+   {
+    "publisher": "Hungry Howie's (2025 FDD Item 7)",
+    "title": "2025 FDD Item 7: Estimated Initial Investment",
+    "url": "https://franchising.hungryhowies.com/wp-content/uploads/2025/04/2025-FDD_Item-7.pdf",
+    "date": "2025-04",
+    "figure": "'This estimate contemplates a security deposit equal to one month's rent. You may be required to pay a larger security deposit.'"
+   },
+   {
+    "publisher": "Occupier",
+    "title": "Leasing Restaurant Space: Tips on Lease Terms",
+    "url": "https://www.occupier.com/blog/leasing-restaurant-space",
+    "date": "2024-03",
+    "figure": "'Restaurateurs should negotiate to limit the deposit size to no more than 3-6 months' rent'."
+   }
+  ]
+ },
+ "build_vacant": {
+  "by": "format",
+  "values": {
+   "quick_service": [
+    160,
+    200,
+    265
+   ],
+   "fast_casual": [
+    195,
+    245,
+    330
+   ],
+   "full_service": [
+    250,
+    330,
+    425
+   ]
+  },
+  "status": "partial",
+  "source": "Hungry Howie's (2025 FDD Item 7); M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance); Terrapin Construction Group",
+  "url": "https://franchising.hungryhowies.com/wp-content/uploads/2025/04/2025-FDD_Item-7.pdf",
+  "date": "2025-04",
+  "note": "QS: Hungry Howie's FDD LHI $196.5k-$273.5k over 1,300-1,600 sf = $123-$210/sf, midpoint ~$162 (national strip center) -> low 160; mode = midpoint x Chicago urban premium ~1.1-1.25 (Klasik 8-12%) -> 200; high = $210 x 1.25 -> 265. FC: Terrapin Chicago shell $250-$425/sf less ~22% kitchen systems (to avoid double-counting the equipment parameter) = $195-$331 -> low 195, high 330; mode = Teriyaki Madness FDD LHI midpoint ($380.5k / 1,550 sf = $245). FS: Terrapin Chicago shell full range $250-$425 (heavier MEP, bar, dining finishes; mode = midpoint ~$337 -> 330); if equipment is modeled separately and you want strict exclusion, multiply FS by 0.78 -> [195,257,331]. Klasik's vanilla-box $500-$700+ is a higher Chicago contractor quote (scope unclear; likely incl. soft costs/equipment). All proposals are above the placeholders.",
+  "sources": [
+   {
+    "publisher": "Hungry Howie's (2025 FDD Item 7)",
+    "title": "2025 FDD Item 7: Estimated Initial Investment",
+    "url": "https://franchising.hungryhowies.com/wp-content/uploads/2025/04/2025-FDD_Item-7.pdf",
+    "date": "2025-04",
+    "figure": "Typical 1,300-1,600 sf strip-center restaurant: Leasehold improvements $196,500-$273,500 (before landlord TI); Equipment and fixtures $86,100-$133,700; Architectural drawings & local plan review fees $11,600-$13,150; Grand opening fee $15,000; Training travel $2,500-$4,500; Security deposits $0-$7,600; Additional funds - 3 months $2,130-$20,000; 'Ordinarily, you will not pay rent until you open ... there are instances in which you may have to pay rent for 1-2 months prior to opening'."
+   },
+   {
+    "publisher": "M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance)",
+    "title": "Teriyaki Madness Franchise Disclosure Document, Item 7 Table A",
+    "url": "https://www.restfinance.com/app/pdf/fdd/Teriyaki-Madness-2025.pdf",
+    "date": "2026",
+    "figure": "Fast-casual Asian, 1,300-1,800 sf: Leasehold improvements $156,000-$605,000 (low 'assumes that the space does not require additional HVAC, ventilation, plumbing, electrical, gas, restrooms, or grease traps'); Furniture, fixtures and equipment $54,000-$181,000; Business licenses and permits $1,000-$10,860; Permit expeditor $0-$4,500; Grand opening promotion $10,000; Training $1,200-$4,500; Additional funds - 3 months $10,000-$40,000; rent commencement ~120-180 days after permits; must open within 210 days after signing lease."
+   },
+   {
+    "publisher": "Terrapin Construction Group",
+    "title": "Restaurant Build Out Cost Per Square Foot by City (2026)",
+    "url": "https://terrapincg.com/news/high-end-restaurant-construction-cost-per-square-foot",
+    "date": "2026-07",
+    "figure": "Cold/vanilla shell build-out to finished, Midwest (Chicago, Minneapolis): $250-$425/sf hard cost incl. MEP, kitchen and finishes, excl. FF&E and soft costs; national second-generation TI $125-$250/sf; commercial kitchen systems ~22% of hard cost; Chicago ground-up (River North/West Loop/Fulton Market) $500-$725/sf."
+   },
+   {
+    "publisher": "Klasik Construction (Chicago contractor)",
+    "title": "Restaurant Build-Out Cost Chicago: Pricing Guide",
+    "url": "https://www.beklasik.com/blog/cost-of-a-restaurant-build-out-in-chicago-2026-guide",
+    "date": "undated (fetched 2026-11; page titled 2027 pricing guide)",
+    "figure": "Cosmetic refresh (kitchen operational, hood compliant) $150-$250/sf ('rarely happens'); second-generation retrofit $300-$450/sf ('most typical'); vanilla box $500-$700+/sf; urban Chicago logistics add 8%-12% vs suburban; permitting/expediting 1%-2% of costs; Chicago permit review 'two to five months'; typical rent abatement 'four or six months of free rent'."
+   }
+  ]
+ },
+ "build_second": {
+  "by": "none",
+  "values": {
+   "all": [
+    90,
+    175,
+    300
+   ]
+  },
+  "status": "partial",
+  "source": "M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance); Terrapin Construction Group; Klasik Construction (Chicago contractor)",
+  "url": "https://www.restfinance.com/app/pdf/fdd/Teriyaki-Madness-2025.pdf",
+  "date": "2026",
+  "note": "Low 90 = Teriyaki Madness FDD low LHI ($156k over 1,300-1,800 sf = $87-$120/sf) for a space needing no HVAC/vent/plumbing/grease work; mode 175 = between Terrapin's national 2nd-gen midpoint (~$187) and Klasik's cosmetic refresh midpoint ($200), discounted toward FDD; high 300 = bottom of Klasik's 'most typical' Chicago 2nd-gen retrofit ($300-$450). RestaurantOwner (2018, total project) implies 2nd-gen costs ~65% of a non-restaurant conversion. Placeholder [45,75,120] is well below every source.",
+  "sources": [
+   {
+    "publisher": "M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance)",
+    "title": "Teriyaki Madness Franchise Disclosure Document, Item 7 Table A",
+    "url": "https://www.restfinance.com/app/pdf/fdd/Teriyaki-Madness-2025.pdf",
+    "date": "2026",
+    "figure": "Fast-casual Asian, 1,300-1,800 sf: Leasehold improvements $156,000-$605,000 (low 'assumes that the space does not require additional HVAC, ventilation, plumbing, electrical, gas, restrooms, or grease traps'); Furniture, fixtures and equipment $54,000-$181,000; Business licenses and permits $1,000-$10,860; Permit expeditor $0-$4,500; Grand opening promotion $10,000; Training $1,200-$4,500; Additional funds - 3 months $10,000-$40,000; rent commencement ~120-180 days after permits; must open within 210 days after signing lease."
+   },
+   {
+    "publisher": "Terrapin Construction Group",
+    "title": "Restaurant Build Out Cost Per Square Foot by City (2026)",
+    "url": "https://terrapincg.com/news/high-end-restaurant-construction-cost-per-square-foot",
+    "date": "2026-07",
+    "figure": "Cold/vanilla shell build-out to finished, Midwest (Chicago, Minneapolis): $250-$425/sf hard cost incl. MEP, kitchen and finishes, excl. FF&E and soft costs; national second-generation TI $125-$250/sf; commercial kitchen systems ~22% of hard cost; Chicago ground-up (River North/West Loop/Fulton Market) $500-$725/sf."
+   },
+   {
+    "publisher": "Klasik Construction (Chicago contractor)",
+    "title": "Restaurant Build-Out Cost Chicago: Pricing Guide",
+    "url": "https://www.beklasik.com/blog/cost-of-a-restaurant-build-out-in-chicago-2026-guide",
+    "date": "undated (fetched 2026-11; page titled 2027 pricing guide)",
+    "figure": "Cosmetic refresh (kitchen operational, hood compliant) $150-$250/sf ('rarely happens'); second-generation retrofit $300-$450/sf ('most typical'); vanilla box $500-$700+/sf; urban Chicago logistics add 8%-12% vs suburban; permitting/expediting 1%-2% of costs; Chicago permit review 'two to five months'; typical rent abatement 'four or six months of free rent'."
+   },
+   {
+    "publisher": "RestaurantOwner.com survey (via PR Newswire)",
+    "title": "How Much Does It Cost to Open a Restaurant? - Over 350 Independent Restaurant Owners Share Their Startup Costs",
+    "url": "https://www.prnewswire.com/news-releases/how-much-does-it-cost-to-open-a-restaurant---over-350-independent-restaurant-owners-share-their-startup-costs-and-financial-performance-300750833.html",
+    "date": "2018-11",
+    "figure": "Median total startup: remodeling existing restaurant space $275,500; remodeling non-restaurant space $425,500; new construction $650,000; overall median $375,000, $113/sf."
+   }
+  ]
+ },
+ "equipment": {
+  "by": "format",
+  "values": {
+   "quick_service": [
+    85000,
+    110000,
+    135000
+   ],
+   "fast_casual": [
+    95000,
+    130000,
+    175000
+   ],
+   "full_service": [
+    110000,
+    160000,
+    200000
+   ]
+  },
+  "status": "partial",
+  "source": "Hungry Howie's (2025 FDD Item 7); M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance); Momma Goldberg's Deli (Item 7, franchisor website)",
+  "url": "https://franchising.hungryhowies.com/wp-content/uploads/2025/04/2025-FDD_Item-7.pdf",
+  "date": "2025-04",
+  "note": "QS: Hungry Howie's FDD equipment & fixtures $86.1k-$133.7k -> [85k,110k,135k]. FC: Momma Goldberg's equipment $95k-$150k + furnishings $12k-$22k = $107k-$172k and Teriyaki Madness FF&E $54k-$181k (midpoint $118k) -> [95k,130k,175k]. FS: Square kitchen $50k-$150k + FOH $10k-$50k; full service assumed in upper half of kitchen range: $100k-$150k + $10k-$50k -> [110k,160k,200k]. No full-service FDD Item 7 with ~2,000 sf could be retrieved, so FS is weaker. Not Chicago-specific (equipment is a national market).",
+  "sources": [
+   {
+    "publisher": "Hungry Howie's (2025 FDD Item 7)",
+    "title": "2025 FDD Item 7: Estimated Initial Investment",
+    "url": "https://franchising.hungryhowies.com/wp-content/uploads/2025/04/2025-FDD_Item-7.pdf",
+    "date": "2025-04",
+    "figure": "Typical 1,300-1,600 sf strip-center restaurant: Leasehold improvements $196,500-$273,500 (before landlord TI); Equipment and fixtures $86,100-$133,700; Architectural drawings & local plan review fees $11,600-$13,150; Grand opening fee $15,000; Training travel $2,500-$4,500; Security deposits $0-$7,600; Additional funds - 3 months $2,130-$20,000; 'Ordinarily, you will not pay rent until you open ... there are instances in which you may have to pay rent for 1-2 months prior to opening'."
+   },
+   {
+    "publisher": "M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance)",
+    "title": "Teriyaki Madness Franchise Disclosure Document, Item 7 Table A",
+    "url": "https://www.restfinance.com/app/pdf/fdd/Teriyaki-Madness-2025.pdf",
+    "date": "2026",
+    "figure": "Fast-casual Asian, 1,300-1,800 sf: Leasehold improvements $156,000-$605,000 (low 'assumes that the space does not require additional HVAC, ventilation, plumbing, electrical, gas, restrooms, or grease traps'); Furniture, fixtures and equipment $54,000-$181,000; Business licenses and permits $1,000-$10,860; Permit expeditor $0-$4,500; Grand opening promotion $10,000; Training $1,200-$4,500; Additional funds - 3 months $10,000-$40,000; rent commencement ~120-180 days after permits; must open within 210 days after signing lease."
+   },
+   {
+    "publisher": "Momma Goldberg's Deli (Item 7, franchisor website)",
+    "title": "Item 7 Estimated Initial Investment",
+    "url": "https://mgfranchise.com/wp-content/uploads/2025/07/Initial_Investment.pdf",
+    "date": "2025-07",
+    "figure": "Equipment, fixtures and other fixed assets $95,000-$150,000; Furnishings $12,000-$22,000; Permits and licenses $1,500-$5,000; Training $2,500-$12,000; Working capital before operations $10,000-$50,000; Working capital initial 3 months $25,000-$50,000; worker's compensation premium estimated at 3% of payroll."
+   },
+   {
+    "publisher": "Square",
+    "title": "How Much Does it Cost to Open a Restaurant?",
+    "url": "https://squareup.com/us/en/the-bottom-line/starting-your-business/restaurant-start-up-costs",
+    "date": "2026-03",
+    "figure": "'A full commercial kitchen setup can cost between $50,000 and $150,000'; furniture and decor 'between $10,000 and $50,000+'; figures pulled from public websites Feb 2026."
+   }
+  ]
+ },
+ "equip_repair": {
+  "by": "none",
+  "values": {
+   "all": [
+    0.15,
+    0.25,
+    0.4
+   ]
+  },
+  "status": "unsourced",
+  "source": "PepperLot Blog (via search summary only)",
+  "url": "https://pepperlot.com/blog/second-generation-restaurant-space-what-it-is-and-why-it-matters",
+  "date": "2026",
+  "note": "No public source gives repair/top-up spend as a share of new equipment cost. Values are the unchanged placeholder and remain unsourced.",
+  "sources": [
+   {
+    "publisher": "PepperLot Blog (via search summary only)",
+    "title": "Second Generation Restaurant Space: What It Is and Why It Matters",
+    "url": "https://pepperlot.com/blog/second-generation-restaurant-space-what-it-is-and-why-it-matters",
+    "date": "2026",
+    "figure": "Search-result summary only (page not opened): walk-in compressor repair $2,000-$8,000; replacement grease trap $8,000-$30,000; Type 1 hood/exhaust $40,000-$120,000 new. Not used for the triangle."
+   }
+  ]
+ },
+ "key_money": {
+  "by": "none",
+  "values": {
+   "all": [
+    0,
+    45000,
+    280000
+   ]
+  },
+  "status": "partial",
+  "source": "PepperLot; BizBuySell (via search summary only)",
+  "url": "https://pepperlot.com/chicago-restaurants-for-sale",
+  "date": "2026-11",
+  "note": "Low 0: landlord-direct second-gen listings advertise equipment included with no buyout stated (absence of a price, not a confirmed $0). High 280k: lowest Chicago asset-sale asking price for a turnkey space found (asking prices exceed transaction prices and may include liquor license/goodwill). Mode 45k is the placeholder and is NOT sourced; no public data on typical key money paid was found.",
+  "sources": [
+   {
+    "publisher": "PepperLot",
+    "title": "Chicago, IL Restaurants for Sale",
+    "url": "https://pepperlot.com/chicago-restaurants-for-sale",
+    "date": "2026-11",
+    "figure": "Asset Sale, Full Restaurant, 6207 S Kedzie Ave, Chicago, 1,200 sf, turnkey, equipment included: $280,000; Asset Sale, Turn-Key Restaurant, Tinley Park, 2,000 sf: $290,000 (negotiable); business sales: North Side Chicago 3,204 sf $295,000; bar 1,500 sf $299,000."
+   },
+   {
+    "publisher": "PepperLot",
+    "title": "Listing: Second-Generation Restaurant in the Heart of Lakeview, 3215 N Sheffield",
+    "url": "https://pepperlot.com/property/second-generation-restaurant-in-the-heart-of-lakeview-2956ee9a",
+    "date": "2026-11",
+    "figure": "Base rent $32/SF/yr NNN; 'Equipment Included' - no separate buyout price stated."
+   },
+   {
+    "publisher": "BizBuySell (via search summary only)",
+    "title": "Restaurants and Food Businesses For Sale in Chicago, IL",
+    "url": "https://www.bizbuysell.com/illinois/chicago/restaurants-and-food-businesses-for-sale/",
+    "date": "2026",
+    "figure": "Search-result summary only (page returned 403): median asking price for Chicago restaurants $267,000; median revenue $800,000; median revenue multiple 0.41."
+   }
+  ]
+ },
+ "licenses": {
+  "by": "none",
+  "values": {
+   "all": [
+    3000,
+    6000,
+    15000
+   ]
+  },
+  "status": "partial",
+  "source": "City of Chicago, BACP; City of Chicago, Department of Buildings; Business License Guide (third party)",
+  "url": "https://www.chicago.gov/city/en/depts/bacp/supp_info/retailfoodestablishment0.html",
+  "date": "2026",
+  "note": "Official Chicago fees for a ~2,000 sf restaurant: RFE license $940 + DOB inspection $500 + building permit (>= $602 minimum; exact A-occupancy alteration fee could not be computed because the 2026 fee tables PDF is not fetchable) ~= $2k-$3k floor -> low 3,000. Mode 6,000 ~ Teriyaki Madness licenses/permits midpoint ($5.9k). High 15,000 ~ Teriyaki Madness high licenses ($10.9k) + expediter ($4.5k). Architect/engineering fees (HH $11.6-13.2k incl. plan review; TM $22.5-43k) are excluded - model them elsewhere if needed. Placeholder [8k,12k,18k] only fits if architect/expediter costs are bundled in.",
+  "sources": [
+   {
+    "publisher": "City of Chicago, BACP",
+    "title": "Retail Food Establishment",
+    "url": "https://www.chicago.gov/city/en/depts/bacp/supp_info/retailfoodestablishment0.html",
+    "date": "2026",
+    "figure": "Fees: 0-1,000 sq.ft. = $660; 1,001-2,500 = $940; 2,501-4,500 = $1,110; 4,501-10,000 = $1,320; over 10,000 = $1,650. 'License renewals are based on a 2 year term.' Premises must pass a public health inspection before license."
+   },
+   {
+    "publisher": "City of Chicago, Department of Buildings",
+    "title": "Department of Buildings Changes for 2026",
+    "url": "https://www.chicago.gov/city/en/depts/bldgs/provdrs/bldg_code/alerts/2025/december/2026changes.html",
+    "date": "2026-01",
+    "figure": "Plan-based building permits: 'The initial non-refundable deposit will increase to $600.00'; fees follow 2026 Amended Fee Tables (CPI-indexed)."
+   },
+   {
+    "publisher": "Business License Guide (third party)",
+    "title": "Chicago, IL Restaurant and Retail Food License Guide (2026)",
+    "url": "https://businesslicenseguide.com/chicago-il-restaurant-retail-food-license-guide/",
+    "date": "2026-10",
+    "figure": "DOB place-for-eating inspection fee (4-8-042): $200 up to 1,500 sf, $500 for 1,501-4,500, $800 for 4,501-10,000, $1,100 above 10,000 (as of Jan 1, 2026); $25 application fee credited to license fee."
+   },
+   {
+    "publisher": "PermitCalculator.com (third party)",
+    "title": "Chicago Building Permit Costs (2026)",
+    "url": "https://permitcalculator.com/cities/chicago-il/",
+    "date": "2026",
+    "figure": "Plan-review permits priced as construction factor x scope-of-review factor x area; $602 all-permit minimum; $600 non-refundable deposit."
+   },
+   {
+    "publisher": "M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance)",
+    "title": "Teriyaki Madness Franchise Disclosure Document, Item 7 Table A",
+    "url": "https://www.restfinance.com/app/pdf/fdd/Teriyaki-Madness-2025.pdf",
+    "date": "2026",
+    "figure": "Fast-casual Asian, 1,300-1,800 sf: Leasehold improvements $156,000-$605,000 (low 'assumes that the space does not require additional HVAC, ventilation, plumbing, electrical, gas, restrooms, or grease traps'); Furniture, fixtures and equipment $54,000-$181,000; Business licenses and permits $1,000-$10,860; Permit expeditor $0-$4,500; Grand opening promotion $10,000; Training $1,200-$4,500; Additional funds - 3 months $10,000-$40,000; rent commencement ~120-180 days after permits; must open within 210 days after signing lease."
+   },
+   {
+    "publisher": "Hungry Howie's (2025 FDD Item 7)",
+    "title": "2025 FDD Item 7: Estimated Initial Investment",
+    "url": "https://franchising.hungryhowies.com/wp-content/uploads/2025/04/2025-FDD_Item-7.pdf",
+    "date": "2025-04",
+    "figure": "Typical 1,300-1,600 sf strip-center restaurant: Leasehold improvements $196,500-$273,500 (before landlord TI); Equipment and fixtures $86,100-$133,700; Architectural drawings & local plan review fees $11,600-$13,150; Grand opening fee $15,000; Training travel $2,500-$4,500; Security deposits $0-$7,600; Additional funds - 3 months $2,130-$20,000; 'Ordinarily, you will not pay rent until you open ... there are instances in which you may have to pay rent for 1-2 months prior to opening'."
+   },
+   {
+    "publisher": "RestaurantLaunchpad",
+    "title": "How to Get Restaurant Permits and Licenses: Complete 2026 Guide",
+    "url": "https://restaurantlaunchpad.io/how-to-get-restaurant-permits-and-licenses/",
+    "date": "2026-04",
+    "figure": "Essential permits, no liquor: $1,000-$4,000; full-service with full liquor license $5,000-$15,000 incl. attorney, expediter and building modifications; expediter $500-$5,000."
+   }
+  ]
+ },
+ "liquor_license": {
+  "by": "none",
+  "values": {
+   "all": [
+    5000,
+    6700,
+    12000
+   ]
+  },
+  "status": "sourced",
+  "source": "City of Chicago, BACP; Illinois General Assembly; RestaurantLaunchpad",
+  "url": "https://www.chicago.gov/city/en/depts/bacp/supp_info/classes_of_liquorlicenses.html",
+  "date": "2026",
+  "note": "Low 5,000 ~ city COP $4,440 + state retailer $600 (online). Mode 6,700 ~ $4,440 + $750 + attorney $1,500. High 12,000 ~ $4,440 + $750 + Outdoor Patio $1,800 + attorney $5,000. Liquor liability insurance (required for patio) is an operating cost and excluded. Placeholder [6k,10k,16k] is somewhat high.",
+  "sources": [
+   {
+    "publisher": "City of Chicago, BACP",
+    "title": "Classes of Liquor Licenses",
+    "url": "https://www.chicago.gov/city/en/depts/bacp/supp_info/classes_of_liquorlicenses.html",
+    "date": "2026",
+    "figure": "Consumption on Premises-Incidental Activity (COP): 'Fees:$4,400.00 + $40.00 one time publication fee Renewal:2 Year'; moratorium restrictions do not apply to restaurants seeking COP; Outdoor Patio (secondary): '$1,760.00+$40.00 one time publication fee Renewal:2 Year'."
+   },
+   {
+    "publisher": "Illinois General Assembly",
+    "title": "235 ILCS 5/5-3 (Liquor Control Act license fees)",
+    "url": "https://www.ilga.gov/legislation/ilcs/fulltext.asp?DocName=023500050K5-3",
+    "date": "2026",
+    "figure": "'For a retailer's license . . . 600 750' (online / non-online fee columns)."
+   },
+   {
+    "publisher": "RestaurantLaunchpad",
+    "title": "How to Get Restaurant Permits and Licenses: Complete 2026 Guide",
+    "url": "https://restaurantlaunchpad.io/how-to-get-restaurant-permits-and-licenses/",
+    "date": "2026-04",
+    "figure": "Liquor license attorney typically $1,500-$5,000."
+   }
+  ]
+ },
+ "preopening": {
+  "by": "none",
+  "values": {
+   "all": [
+    12000,
+    25000,
+    50000
+   ]
+  },
+  "status": "partial",
+  "source": "Hungry Howie's (2025 FDD Item 7); M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance); Momma Goldberg's Deli (Item 7, franchisor website)",
+  "url": "https://franchising.hungryhowies.com/wp-content/uploads/2025/04/2025-FDD_Item-7.pdf",
+  "date": "2025-04",
+  "note": "Low 12,000 = Teriyaki Madness grand opening $10k + training $1.2k (rounded); mode 25,000 ~ Hungry Howie's grand opening $15k + training $2.5-4.5k plus pre-opening wages (between HH ~$20k and Katalyst midpoint $30k); high 50,000 = Katalyst and Momma Goldberg's upper bounds. Excludes franchise-only fees (e.g., TM opening assistance $27.5k).",
+  "sources": [
+   {
+    "publisher": "Hungry Howie's (2025 FDD Item 7)",
+    "title": "2025 FDD Item 7: Estimated Initial Investment",
+    "url": "https://franchising.hungryhowies.com/wp-content/uploads/2025/04/2025-FDD_Item-7.pdf",
+    "date": "2025-04",
+    "figure": "Typical 1,300-1,600 sf strip-center restaurant: Leasehold improvements $196,500-$273,500 (before landlord TI); Equipment and fixtures $86,100-$133,700; Architectural drawings & local plan review fees $11,600-$13,150; Grand opening fee $15,000; Training travel $2,500-$4,500; Security deposits $0-$7,600; Additional funds - 3 months $2,130-$20,000; 'Ordinarily, you will not pay rent until you open ... there are instances in which you may have to pay rent for 1-2 months prior to opening'."
+   },
+   {
+    "publisher": "M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance)",
+    "title": "Teriyaki Madness Franchise Disclosure Document, Item 7 Table A",
+    "url": "https://www.restfinance.com/app/pdf/fdd/Teriyaki-Madness-2025.pdf",
+    "date": "2026",
+    "figure": "Fast-casual Asian, 1,300-1,800 sf: Leasehold improvements $156,000-$605,000 (low 'assumes that the space does not require additional HVAC, ventilation, plumbing, electrical, gas, restrooms, or grease traps'); Furniture, fixtures and equipment $54,000-$181,000; Business licenses and permits $1,000-$10,860; Permit expeditor $0-$4,500; Grand opening promotion $10,000; Training $1,200-$4,500; Additional funds - 3 months $10,000-$40,000; rent commencement ~120-180 days after permits; must open within 210 days after signing lease."
+   },
+   {
+    "publisher": "Momma Goldberg's Deli (Item 7, franchisor website)",
+    "title": "Item 7 Estimated Initial Investment",
+    "url": "https://mgfranchise.com/wp-content/uploads/2025/07/Initial_Investment.pdf",
+    "date": "2025-07",
+    "figure": "Training $2,500-$12,000; Working capital required before operations begin $10,000-$50,000."
+   },
+   {
+    "publisher": "Katalyst",
+    "title": "What it really costs to open a restaurant in 2026",
+    "url": "https://www.katalystos.com/blog/how-much-does-it-cost-to-open-a-restaurant-in-2026",
+    "date": "2026-06",
+    "figure": "Pre-opening costs: 'Labor, training, and marketing: $10,000-$50,000'."
+   }
+  ]
+ },
+ "prep_vacant": {
+  "by": "none",
+  "values": {
+   "all": [
+    1,
+    4,
+    10
+   ]
+  },
+  "status": "partial",
+  "source": "Klasik Construction (Chicago contractor); 2nd Gen Kitchens; Penult Projects",
+  "url": "https://www.beklasik.com/blog/cost-of-a-restaurant-build-out-in-chicago-2026-guide",
+  "date": "undated (fetched 2026-11; page titled 2027 pricing guide)",
+  "note": "Lease-to-open for a vacant shell: Chicago permit review 2-5 months (Klasik) + construction 3-6 months (Penult) = 5-11 months; 2nd Gen Kitchens says 8-18. Subtract free rent of 4-6 months (Klasik). Low 1 = 5 months - 4; mode 4 = ~9 months - 5; high 10 = 14 months - 4. If the model already deducts free rent separately, use gross months [5,9,14] instead. Franchisor FDDs (HH: usually no rent before opening, sometimes 1-2 months) support the low end.",
+  "sources": [
+   {
+    "publisher": "Klasik Construction (Chicago contractor)",
+    "title": "Restaurant Build-Out Cost Chicago: Pricing Guide",
+    "url": "https://www.beklasik.com/blog/cost-of-a-restaurant-build-out-in-chicago-2026-guide",
+    "date": "undated (fetched 2026-11; page titled 2027 pricing guide)",
+    "figure": "Cosmetic refresh (kitchen operational, hood compliant) $150-$250/sf ('rarely happens'); second-generation retrofit $300-$450/sf ('most typical'); vanilla box $500-$700+/sf; urban Chicago logistics add 8%-12% vs suburban; permitting/expediting 1%-2% of costs; Chicago permit review 'two to five months'; typical rent abatement 'four or six months of free rent'."
+   },
+   {
+    "publisher": "2nd Gen Kitchens",
+    "title": "Restaurant Space for Lease Chicago",
+    "url": "https://2ndgenkitchens.com/chicago-restaurant-space-for-lease",
+    "date": "2026-Q1",
+    "figure": "'2nd gen leases typically take 2-5 months from signing to opening. First-generation build-outs take 8-18 months'; documented 2nd gen space can save 60-120 days of permitting."
+   },
+   {
+    "publisher": "Penult Projects",
+    "title": "Restaurant Construction Process & Timeline",
+    "url": "https://www.penult.net/insights/restaurant-construction-process-timeline/",
+    "date": "undated",
+    "figure": "Tenant finish-out: 'often 3-6 months of construction after permits'; ground-up 6-12 months."
+   },
+   {
+    "publisher": "M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance)",
+    "title": "Teriyaki Madness Franchise Disclosure Document, Item 7 Table A",
+    "url": "https://www.restfinance.com/app/pdf/fdd/Teriyaki-Madness-2025.pdf",
+    "date": "2026",
+    "figure": "Fast-casual Asian, 1,300-1,800 sf: Leasehold improvements $156,000-$605,000 (low 'assumes that the space does not require additional HVAC, ventilation, plumbing, electrical, gas, restrooms, or grease traps'); Furniture, fixtures and equipment $54,000-$181,000; Business licenses and permits $1,000-$10,860; Permit expeditor $0-$4,500; Grand opening promotion $10,000; Training $1,200-$4,500; Additional funds - 3 months $10,000-$40,000; rent commencement ~120-180 days after permits; must open within 210 days after signing lease."
+   },
+   {
+    "publisher": "Hungry Howie's (2025 FDD Item 7)",
+    "title": "2025 FDD Item 7: Estimated Initial Investment",
+    "url": "https://franchising.hungryhowies.com/wp-content/uploads/2025/04/2025-FDD_Item-7.pdf",
+    "date": "2025-04",
+    "figure": "Typical 1,300-1,600 sf strip-center restaurant: Leasehold improvements $196,500-$273,500 (before landlord TI); Equipment and fixtures $86,100-$133,700; Architectural drawings & local plan review fees $11,600-$13,150; Grand opening fee $15,000; Training travel $2,500-$4,500; Security deposits $0-$7,600; Additional funds - 3 months $2,130-$20,000; 'Ordinarily, you will not pay rent until you open ... there are instances in which you may have to pay rent for 1-2 months prior to opening'."
+   }
+  ]
+ },
+ "prep_second": {
+  "by": "none",
+  "values": {
+   "all": [
+    1,
+    2,
+    4
+   ]
+  },
+  "status": "partial",
+  "source": "2nd Gen Kitchens; Hungry Howie's (2025 FDD Item 7); M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance)",
+  "url": "https://2ndgenkitchens.com/chicago-restaurant-space-for-lease",
+  "date": "2026-Q1",
+  "note": "Gross lease-to-open 2-5 months (2nd Gen Kitchens). Low 1 = HH FDD 'rent for 1-2 months prior to opening' lower bound; mode 2 = low end of 2-5 months (free rent on second-gen deals assumed small - not sourced); high 4 = 5 months less ~1 month abatement. Teriyaki Madness low estimate budgets 3 months' rent before/around opening.",
+  "sources": [
+   {
+    "publisher": "2nd Gen Kitchens",
+    "title": "Restaurant Space for Lease Chicago",
+    "url": "https://2ndgenkitchens.com/chicago-restaurant-space-for-lease",
+    "date": "2026-Q1",
+    "figure": "'2nd gen leases typically take 2-5 months from signing to opening.'"
+   },
+   {
+    "publisher": "Hungry Howie's (2025 FDD Item 7)",
+    "title": "2025 FDD Item 7: Estimated Initial Investment",
+    "url": "https://franchising.hungryhowies.com/wp-content/uploads/2025/04/2025-FDD_Item-7.pdf",
+    "date": "2025-04",
+    "figure": "Typical 1,300-1,600 sf strip-center restaurant: Leasehold improvements $196,500-$273,500 (before landlord TI); Equipment and fixtures $86,100-$133,700; Architectural drawings & local plan review fees $11,600-$13,150; Grand opening fee $15,000; Training travel $2,500-$4,500; Security deposits $0-$7,600; Additional funds - 3 months $2,130-$20,000; 'Ordinarily, you will not pay rent until you open ... there are instances in which you may have to pay rent for 1-2 months prior to opening'."
+   },
+   {
+    "publisher": "M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance)",
+    "title": "Teriyaki Madness Franchise Disclosure Document, Item 7 Table A",
+    "url": "https://www.restfinance.com/app/pdf/fdd/Teriyaki-Madness-2025.pdf",
+    "date": "2026",
+    "figure": "Fast-casual Asian, 1,300-1,800 sf: Leasehold improvements $156,000-$605,000 (low 'assumes that the space does not require additional HVAC, ventilation, plumbing, electrical, gas, restrooms, or grease traps'); Furniture, fixtures and equipment $54,000-$181,000; Business licenses and permits $1,000-$10,860; Permit expeditor $0-$4,500; Grand opening promotion $10,000; Training $1,200-$4,500; Additional funds - 3 months $10,000-$40,000; rent commencement ~120-180 days after permits; must open within 210 days after signing lease."
+   }
+  ]
+ },
+ "reserve_months": {
+  "by": "none",
+  "values": {
+   "all": [
+    3,
+    3,
+    6
+   ]
+  },
+  "status": "sourced",
+  "source": "Legal Information Institute (16 CFR 436.5(g), FTC Franchise Rule); Hungry Howie's (2025 FDD Item 7); M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance)",
+  "url": "https://www.law.cornell.edu/cfr/text/16/436.5",
+  "date": "current",
+  "note": "Low/mode 3 = FTC Item 7 convention used by every FDD reviewed ('Additional funds - 3 months'); high 6 = upper end of general guidance (Katalyst 3-6). Note FDD dollar amounts for the 3-month reserve are small ($2k-$50k) because they assume ramping sales offset costs; the model's 'months of fixed costs' is more conservative. No SBA page with a specific month count was found.",
+  "sources": [
+   {
+    "publisher": "Legal Information Institute (16 CFR 436.5(g), FTC Franchise Rule)",
+    "title": "16 CFR 436.5 - Disclosure items, Item 7",
+    "url": "https://www.law.cornell.edu/cfr/text/16/436.5",
+    "date": "current",
+    "figure": "'Include a category titled Additional funds - [initial period] ... A reasonable initial period is at least three months or a reasonable period for the industry.'"
+   },
+   {
+    "publisher": "Hungry Howie's (2025 FDD Item 7)",
+    "title": "2025 FDD Item 7: Estimated Initial Investment",
+    "url": "https://franchising.hungryhowies.com/wp-content/uploads/2025/04/2025-FDD_Item-7.pdf",
+    "date": "2025-04",
+    "figure": "Typical 1,300-1,600 sf strip-center restaurant: Leasehold improvements $196,500-$273,500 (before landlord TI); Equipment and fixtures $86,100-$133,700; Architectural drawings & local plan review fees $11,600-$13,150; Grand opening fee $15,000; Training travel $2,500-$4,500; Security deposits $0-$7,600; Additional funds - 3 months $2,130-$20,000; 'Ordinarily, you will not pay rent until you open ... there are instances in which you may have to pay rent for 1-2 months prior to opening'."
+   },
+   {
+    "publisher": "M.H. Franchise Company / Teriyaki Madness (2026 FDD Item 7, hosted by RestFinance)",
+    "title": "Teriyaki Madness Franchise Disclosure Document, Item 7 Table A",
+    "url": "https://www.restfinance.com/app/pdf/fdd/Teriyaki-Madness-2025.pdf",
+    "date": "2026",
+    "figure": "Fast-casual Asian, 1,300-1,800 sf: Leasehold improvements $156,000-$605,000 (low 'assumes that the space does not require additional HVAC, ventilation, plumbing, electrical, gas, restrooms, or grease traps'); Furniture, fixtures and equipment $54,000-$181,000; Business licenses and permits $1,000-$10,860; Permit expeditor $0-$4,500; Grand opening promotion $10,000; Training $1,200-$4,500; Additional funds - 3 months $10,000-$40,000; rent commencement ~120-180 days after permits; must open within 210 days after signing lease."
+   },
+   {
+    "publisher": "Katalyst",
+    "title": "What it really costs to open a restaurant in 2026",
+    "url": "https://www.katalystos.com/blog/how-much-does-it-cost-to-open-a-restaurant-in-2026",
+    "date": "2026-06",
+    "figure": "'Budget three to six months of operating expenses'; also cites more conservative guidance of six to nine months."
+   }
+  ]
+ },
+ "cook_wage": {
+  "by": "none",
+  "values": {
+   "all": [
+    17.45,
+    18.72,
+    21.88
+   ]
+  },
+  "status": "sourced",
+  "source": "BLS OEWS May 2025, Chicago-Naperville-Elgin MSA (35-2014)",
+  "url": "https://data.bls.gov/oes/#/area/0016980/2025",
+  "date": "2025-05",
+  "note": "25th percentile / median / 75th percentile, Cooks, Restaurant, hourly. Retrieved from the BLS public API, series OEUM001698000000035201407/08/09 (hourly) or 12/13/14 (annual). MSA figures include the suburbs."
+ },
+ "lead_wage": {
+  "by": "none",
+  "values": {
+   "all": [
+    17.73,
+    20.5,
+    27.47
+   ]
+  },
+  "status": "sourced",
+  "source": "BLS OEWS May 2025, Chicago-Naperville-Elgin MSA (35-1012)",
+  "url": "https://data.bls.gov/oes/#/area/0016980/2025",
+  "date": "2025-05",
+  "note": "25th percentile / median / 75th percentile, First-Line Supervisors of Food Preparation and Serving Workers, hourly. Retrieved from the BLS public API, series OEUM001698000000035101207/08/09 (hourly) or 12/13/14 (annual). MSA figures include the suburbs."
+ },
+ "gm_salary": {
+  "by": "none",
+  "values": {
+   "all": [
+    55990,
+    65620,
+    82530
+   ]
+  },
+  "status": "sourced",
+  "source": "BLS OEWS May 2025, Chicago-Naperville-Elgin MSA (11-9051)",
+  "url": "https://data.bls.gov/oes/#/area/0016980/2025",
+  "date": "2025-05",
+  "note": "25th percentile / median / 75th percentile, Food Service Managers, annual. Retrieved from the BLS public API, series OEUM001698000000011905107/08/09 (hourly) or 12/13/14 (annual). MSA figures include the suburbs."
+ },
+ "km_salary": {
+  "by": "none",
+  "values": {
+   "all": [
+    51990,
+    60770,
+    73620
+   ]
+  },
+  "status": "sourced",
+  "source": "BLS OEWS May 2025, Chicago-Naperville-Elgin MSA (35-1011)",
+  "url": "https://data.bls.gov/oes/#/area/0016980/2025",
+  "date": "2025-05",
+  "note": "25th percentile / median / 75th percentile, Chefs and Head Cooks, annual. Retrieved from the BLS public API, series OEUM001698000000035101107/08/09 (hourly) or 12/13/14 (annual). MSA figures include the suburbs."
+ }
+}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { SAMPLE_NOTICE, ZIP_BY_CODE, ZIPS } from '../data/sample'
+import { dataNotice, ZIP_BY_CODE, ZIPS } from '../data/blocks'
 import {
   CUISINE_LABEL, CUISINES, DEFAULT_FORMAT, FORMAT_LABEL, RISK_LABEL, RISK_RULE, type Cuisine, type Daypart, type Inputs, type RiskAppetite,
   type ServiceFormat, type StorefrontPref,
@@ -108,7 +108,7 @@ export default function Intake({ inputs, onChange, onSubmit, busy }: Props) {
             <i />
             <span>{inputs.liquor ? 'Needed' : 'Not needed'}</span>
           </button>
-          <span className="hint">{inputs.liquor ? 'Moratorium blocks are excluded' : 'No liquor constraint'}</span>
+          <span className="hint">{inputs.liquor ? 'Dry-precinct blocks excluded (City map, 2011) — confirm with BACP' : 'No liquor constraint'}</span>
         </label>
       </div>
 
@@ -186,11 +186,50 @@ export default function Intake({ inputs, onChange, onSubmit, busy }: Props) {
         </div>
       </div>
 
+      <div className="field">
+        <span className="lbl">About you <em>optional · sharpens the survival model; blank = ZIP average</em></span>
+        <div className="field-row">
+          <label className="field">
+            <span className="hint">Chicago food licenses you held before</span>
+            <input
+              inputMode="numeric"
+              placeholder="ZIP average"
+              value={inputs.operator.priorLicenses ?? ''}
+              onChange={(e) => {
+                const v = e.target.value.replace(/\D/g, '')
+                set({ operator: { ...inputs.operator, priorLicenses: v === '' ? null : Math.min(999, parseInt(v, 10)) } })
+              }}
+            />
+          </label>
+          <div className="field">
+            <span className="hint">Registered as</span>
+            <Seg<'unset' | 'company' | 'person'>
+              value={inputs.operator.entity == null ? 'unset' : inputs.operator.entity ? 'company' : 'person'}
+              options={[
+                { key: 'unset', label: 'ZIP avg.' },
+                { key: 'company', label: 'LLC / Inc' },
+                { key: 'person', label: 'Individual' },
+              ]}
+              onChange={(v) => set({ operator: { ...inputs.operator, entity: v === 'unset' ? null : v === 'company' } })}
+            />
+          </div>
+        </div>
+        <label className="field">
+          <span className="hint">Street address you have in mind (checks its license history)</span>
+          <input
+            placeholder="e.g. 2121 N Clark St"
+            maxLength={120}
+            value={inputs.operator.address}
+            onChange={(e) => set({ operator: { ...inputs.operator, address: e.target.value } })}
+          />
+        </label>
+      </div>
+
       <button type="submit" className="cta" disabled={!zipInfo || busy}>
         <span>{busy ? 'Analyzing…' : 'Generate site report'}</span>
         <i>→</i>
       </button>
-      <div className="sample-note">{SAMPLE_NOTICE}. ZIP boundaries are real (2020 ZCTA).</div>
+      <div className="sample-note">{dataNotice()}. Sources: Overture places, Chicago Business Licenses, LEHD LODES, CTA, Chicago Population Counts.</div>
     </form>
   )
 }

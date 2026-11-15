@@ -1,0 +1,115 @@
+{
+  "_global": {
+    "days_open_per_month": 30,
+    "hours_per_staff_month": 160,
+    "chicago_min_wage": 17.05,
+    "chicago_tipped_wage": 12.96,
+    "second_gen_factor": 0.38,
+    "sources": {
+      "wages": "BLS OEWS Chicago-Naperville-Elgin May 2025 https://data.bls.gov/oes/#/area/0016980/2025",
+      "min_wage": "Chicago min wage $17.05 / tipped $12.96 from 2026-07-01 (WTTW, ABC7)",
+      "second_gen_factor": "RestaurantOwner.com survey (2018) via UpMenu: second-gen $73/sqft vs new $193/sqft",
+      "calibration": "Sales/sqft $250-400 (TouchBistro, Metrobi); NRA 2024 median net margin FSR 2.8%, LSR 4.0%",
+      "occupancy": "Team estimate, calibrated to sales/sqft benchmarks",
+      "target_sqft": "Team estimate of typical store size"
+    }
+  },
+  "fast_food": {
+    "label": "Fast food",
+    "avg_hourly_wage": 17.31,
+    "startup_cost_psf_new": 175,
+    "sqft_per_seat": 18,
+    "min_sqft": 800,
+    "max_sqft": 2000,
+    "turns_per_day": 3.0,
+    "base_ticket": 12,
+    "food_cost_pct": 0.28,
+    "labor_pct": 0.3,
+    "other_pct": 0.15,
+    "fixed_other_monthly": 1500,
+    "min_staff": 3,
+    "reserve_ratio": 0.25,
+    "occupancy": 0.5,
+    "target_sqft": 1500,
+    "sources": {
+      "food_cost_pct": "Industry range 25-30% (Toast, SpotOn, ChowNow)",
+      "labor_pct": "NRA 2024 LSR median 31.7%, profitable ~30%",
+      "avg_hourly_wage": "BLS Chicago 2025 fast food cook $17.31",
+      "startup_cost_psf_new": "Survey: LSR median $225,500 to open (estimate)",
+      "base_ticket": "Blogs: QSR $8-12; prefer Google Places price range"
+    }
+  },
+  "italian": {
+    "label": "Italian",
+    "avg_hourly_wage": 18.5,
+    "startup_cost_psf_new": 225,
+    "sqft_per_seat": 22,
+    "min_sqft": 1500,
+    "max_sqft": 3500,
+    "turns_per_day": 1.2,
+    "base_ticket": 32,
+    "food_cost_pct": 0.3,
+    "labor_pct": 0.34,
+    "other_pct": 0.15,
+    "fixed_other_monthly": 2000,
+    "min_staff": 5,
+    "reserve_ratio": 0.25,
+    "occupancy": 0.5,
+    "target_sqft": 2500,
+    "sources": {
+      "food_cost_pct": "Toast: 2024 FSR median 32%; pasta lowers it (estimate)",
+      "labor_pct": "NRA 2024 FSR median 36.5%, profitable ~34.2%",
+      "avg_hourly_wage": "BLS Chicago 2025 blend: cook $19.45, server $17.14, dishwasher $18.01",
+      "startup_cost_psf_new": "Survey: FSR median $475,500 to open (estimate)",
+      "base_ticket": "Casual dining ~$22, Italian w/ drinks higher (estimate); prefer Google Places"
+    }
+  },
+  "steakhouse": {
+    "label": "Steakhouse",
+    "avg_hourly_wage": 19.0,
+    "startup_cost_psf_new": 300,
+    "sqft_per_seat": 28,
+    "min_sqft": 2500,
+    "max_sqft": 5000,
+    "turns_per_day": 0.7,
+    "base_ticket": 70,
+    "food_cost_pct": 0.37,
+    "labor_pct": 0.33,
+    "other_pct": 0.15,
+    "fixed_other_monthly": 3500,
+    "min_staff": 9,
+    "reserve_ratio": 0.25,
+    "occupancy": 0.5,
+    "target_sqft": 4000,
+    "sources": {
+      "food_cost_pct": "Single source 33-40%",
+      "labor_pct": "NRA FSR data, lowered for high check (estimate)",
+      "startup_cost_psf_new": "New FSR build-out $250-600/sqft, low end (estimate)",
+      "base_ticket": "Steakhouse check +20-50% from drinks (estimate); prefer Google Places"
+    }
+  },
+  "asian": {
+    "label": "Asian",
+    "avg_hourly_wage": 18.25,
+    "startup_cost_psf_new": 200,
+    "sqft_per_seat": 20,
+    "min_sqft": 1200,
+    "max_sqft": 3000,
+    "turns_per_day": 1.4,
+    "base_ticket": 24,
+    "food_cost_pct": 0.31,
+    "labor_pct": 0.34,
+    "other_pct": 0.15,
+    "fixed_other_monthly": 1800,
+    "min_staff": 4,
+    "reserve_ratio": 0.25,
+    "occupancy": 0.5,
+    "target_sqft": 2000,
+    "sources": {
+      "food_cost_pct": "FSR range 28-35%",
+      "labor_pct": "NRA FSR data",
+      "startup_cost_psf_new": "Between QSR and FSR (estimate)",
+      "base_ticket": "Near casual dining $22 (estimate); prefer Google Places"
+    }
+  }
+}

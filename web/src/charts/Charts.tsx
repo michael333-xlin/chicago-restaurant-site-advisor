@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { gapColor, paybackColor, RANK_COLORS } from '../colors'
+import { gapColor, gapSpan, paybackColor, RANK_COLORS } from '../colors'
 import { CUISINE_SHORT, CUISINES, STOREFRONT_LABEL, type Cuisine, type Plan, type PlanDetail, type PnL, type Report, type StartupBreakdown } from '../types'
 import { monthsNum, pct, usd } from '../format'
 import { useInView, useTween } from '../hooks'
@@ -214,20 +214,39 @@ export function Scatter({ report, onPick }: { report: Report; onPick: (i: number
   const W = 680, H = 340, l = 52, r = 16, t = 18, b = 40
   const H0 = report.horizon
   const cap = (v: number) => (Number.isFinite(v) ? Math.min(v, H0 + 4) : H0 + 4)
-  const x = (m: number) => l + (cap(m) / (H0 + 6)) * (W - l - r)
-  const maxY = Math.max(0.25, ...report.plans.map((p) => p.noPaybackProb)) * 1.08
+  // axes fitted to the plans actually simulated (6-month steps, at least 18 months wide), not a fixed 0-72
+  const xs = report.plans.map((p) => cap(p.payback.p50))
+  let x0 = Math.max(0, Math.floor((Math.min(...xs) - 3) / 6) * 6)
+  let x1 = Math.min(H0 + 6, Math.ceil((Math.max(...xs) + 3) / 6) * 6)
+  if (x1 - x0 < 18) {
+    const mid = (x0 + x1) / 2
+    x0 = Math.max(0, Math.floor((mid - 9) / 6) * 6)
+    x1 = x0 + 18
+  }
+  const x = (m: number) => l + ((cap(m) - x0) / (x1 - x0)) * (W - l - r)
+  const step = x1 - x0 > 48 ? 12 : 6
+  const xTicks = Array.from({ length: Math.floor((x1 - x0) / step) + 1 }, (_, i) => x0 + i * step).filter((m) => m <= H0)
+  const NICE = [0.02, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.8, 1]
+  const rawMax = Math.max(...report.plans.map((p) => p.noPaybackProb)) * 1.15
+  const maxY = NICE.find((v) => v >= rawMax) ?? 1
   const y = (v: number) => t + (1 - v / maxY) * (H - t - b)
   const topIdx = new Map(report.top.map((p, i) => [p.id, i]))
   const plans = [...report.plans].sort((p, q) => (topIdx.has(p.id) ? 1 : 0) - (topIdx.has(q.id) ? 1 : 0))
+  const sweetX = Math.min(30, x1)
+  const nOver = report.plans.filter((p) => !p.feasible).length
   return (
     <div className="scatter-wrap">
       <svg ref={ref} viewBox={`0 0 ${W} ${H}`} className={`chart scatter ${inView ? 'in' : ''}`}>
-        <rect x={l} y={y(Math.min(maxY, 0.1))} width={x(30) - l} height={y(0) - y(Math.min(maxY, 0.1))} className="sweet" />
-        <text x={l + 8} y={y(0) - 8} className="sweet-label">Fast &amp; safe</text>
-        {[0, 12, 24, 36, 48, 60, 72].map((m) => (
+        {x0 < 30 && (
+          <>
+            <rect x={l} y={y(Math.min(maxY, 0.1))} width={x(sweetX) - l} height={y(0) - y(Math.min(maxY, 0.1))} className="sweet" />
+            <text x={l + 8} y={y(0) - 8} className="sweet-label">Fast &amp; safe (&lt;30 mo, &lt;10% no payback)</text>
+          </>
+        )}
+        {xTicks.map((m) => (
           <g key={m}>
             <line x1={x(m)} x2={x(m)} y1={t} y2={H - b} className="grid" />
-            <text x={x(m)} y={H - b + 16} textAnchor="middle" className="tick">{m === 72 ? '72+' : m}</text>
+            <text x={x(m)} y={H - b + 16} textAnchor="middle" className="tick">{m >= H0 ? `${H0}+` : m}</text>
           </g>
         ))}
         {[0, 0.25, 0.5, 0.75, 1].map((f) => f * maxY).map((v) => (
@@ -240,8 +259,10 @@ export function Scatter({ report, onPick }: { report: Report; onPick: (i: number
         <text x={14} y={(t + H - b) / 2} textAnchor="middle" className="axis-label" transform={`rotate(-90 14 ${(t + H - b) / 2})`}>Chance of no payback within 5 yrs</text>
         {plans.map((p, i) => {
           const rank = topIdx.get(p.id)
-          const rad = 3 + (p.sqft / 1000) * 1.6
-          const color = rank != null ? rgb(RANK_COLORS[rank]) : p.feasible ? paybackColor(p.payback.p50, 0.75) : 'rgba(244,239,232,0.18)'
+          const rad = 3.5 + (p.sqft / 1000) * 1.8
+          const base = paybackColor(p.payback.p50, 1)
+          const fill = rank != null ? rgb(RANK_COLORS[rank]) : p.feasible ? paybackColor(p.payback.p50, 0.9) : paybackColor(p.payback.p50, 0.16)
+          const stroke = rank != null ? '#fff' : p.feasible ? 'rgba(8,10,14,0.85)' : base
           return (
             <g
               key={p.id}
@@ -251,7 +272,7 @@ export function Scatter({ report, onPick }: { report: Report; onPick: (i: number
               onMouseLeave={() => setHover(null)}
               onClick={() => rank != null && onPick(rank)}
             >
-              <circle cx={x(p.payback.p50)} cy={y(p.noPaybackProb)} r={rank != null ? rad + 3 : rad} fill={p.feasible || rank != null ? color : 'none'} stroke={p.feasible ? 'rgba(8,10,14,0.8)' : 'rgba(244,239,232,0.35)'} />
+              <circle cx={x(p.payback.p50)} cy={y(p.noPaybackProb)} r={rank != null ? rad + 3 : rad} fill={fill} stroke={stroke} strokeWidth={p.feasible ? 1 : 1.6} />
               {rank != null && (
                 <text x={x(p.payback.p50)} y={y(p.noPaybackProb) - rad - 8} textAnchor="middle" className="pt-rank">#{rank + 1}</text>
               )}
@@ -264,11 +285,12 @@ export function Scatter({ report, onPick }: { report: Report; onPick: (i: number
           <>
             <b>{hover.block.street.label}</b> · {hover.sqft.toLocaleString()} sq ft · {STOREFRONT_LABEL[hover.storefront]}
             <br />
-            P50 payback {monthsNum(hover.payback.p50)} mo · startup {usd(hover.startup.p50)} · {hover.feasible ? 'within budget' : 'over budget'}
+            P50 payback {monthsNum(hover.payback.p50)} mo · no payback in 5 yrs {pct(hover.noPaybackProb)} · startup {usd(hover.startup.p50)} · {hover.feasible ? 'within budget' : 'over budget'}
           </>
         ) : (
           <span className="muted">
-            {report.plans.length} simulated plans · dot size = floor area · hollow = over budget. Hover a dot for details.
+            {report.plans.length} simulated plans ({nOver} over budget) · colour = payback speed · filled = within budget, ring = over budget · dot size = floor area. Axes fitted to
+            the plans shown. Hover a dot for details.
           </span>
         )}
       </div>
@@ -282,6 +304,7 @@ export function GapMatrix({ report }: { report: Report }) {
   const mine = report.inputs.cuisine
   const rows = [...report.matrix.map((m) => ({ label: m.label, sub: m.block.street.grid, gaps: m.gaps })), { label: `ZIP ${report.zip.zip} average`, sub: 'all commercial blocks', gaps: report.zipGaps }]
   const best = (g: Record<Cuisine, number>) => CUISINES.reduce((a, c) => (g[c] > g[a] ? c : a), CUISINES[0])
+  const span = gapSpan(rows.flatMap((r) => CUISINES.map((c) => r.gaps[c])))
   return (
     <div ref={ref} className={`matrix ${inView ? 'in' : ''}`}>
       <div className="mx-row head">
@@ -298,7 +321,7 @@ export function GapMatrix({ report }: { report: Report }) {
           </div>
           {CUISINES.map((c, j) => {
             const g = r.gaps[c]
-            const col = gapColor(g, 255, 4)
+            const col = gapColor(g, 255, span)
             return (
               <div
                 key={c}

@@ -1,0 +1,155 @@
+{
+  "Logan Square": {
+    "rent_psf_year": 26,
+    "income_index": 1.0,
+    "demand_index": 1.0,
+    "source": "Asking rent (not closed deals): Listings $24, $28 (2026)",
+    "lat": 41.92319,
+    "lng": -87.70739,
+    "bbox": [
+      -87.73146,
+      41.91355,
+      -87.68732,
+      41.93218
+    ],
+    "community_area": "Logan Square",
+    "community_area_number": 22,
+    "zip_codes": [
+      "60647"
+    ],
+    "primary_zip": "60647",
+    "geo_source": "City of Chicago Data Portal: Boundaries - Neighborhoods (9wp7-iasj), Community Areas (igwz-8jzy), ZIP Codes (unjd-c2ca); ZIPs covering >=5% of area"
+  },
+  "Wicker Park": {
+    "rent_psf_year": 36,
+    "income_index": 1.0,
+    "demand_index": 1.0,
+    "source": "Asking rent (not closed deals): Listings $22-70, median",
+    "lat": 41.90868,
+    "lng": -87.67986,
+    "bbox": [
+      -87.6922,
+      41.90297,
+      -87.6675,
+      41.91472
+    ],
+    "community_area": "West Town",
+    "community_area_number": 24,
+    "zip_codes": [
+      "60622",
+      "60647"
+    ],
+    "primary_zip": "60622",
+    "geo_source": "City of Chicago Data Portal: Boundaries - Neighborhoods (9wp7-iasj), Community Areas (igwz-8jzy), ZIP Codes (unjd-c2ca); ZIPs covering >=5% of area"
+  },
+  "Lincoln Park": {
+    "rent_psf_year": 38,
+    "income_index": 1.0,
+    "demand_index": 1.0,
+    "source": "Asking rent (not closed deals): REjournals ~$38 incl. Old Town, date unclear",
+    "lat": 41.92192,
+    "lng": -87.6389,
+    "bbox": [
+      -87.68284,
+      41.91078,
+      -87.62013,
+      41.93301
+    ],
+    "community_area": "Lincoln Park",
+    "community_area_number": 7,
+    "zip_codes": [
+      "60614"
+    ],
+    "primary_zip": "60614",
+    "geo_source": "City of Chicago Data Portal: Boundaries - Neighborhoods (9wp7-iasj), Community Areas (igwz-8jzy), ZIP Codes (unjd-c2ca); ZIPs covering >=5% of area"
+  },
+  "River North": {
+    "rent_psf_year": 39,
+    "income_index": 1.0,
+    "demand_index": 1.0,
+    "source": "Asking rent (not closed deals): REjournals $39.20",
+    "lat": 41.89902,
+    "lng": -87.64132,
+    "bbox": [
+      -87.65923,
+      41.88623,
+      -87.6252,
+      41.9109
+    ],
+    "community_area": "Near North Side",
+    "community_area_number": 8,
+    "zip_codes": [
+      "60610",
+      "60611",
+      "60642",
+      "60654"
+    ],
+    "primary_zip": "60610",
+    "geo_source": "City of Chicago Data Portal: Boundaries - Neighborhoods (9wp7-iasj), Community Areas (igwz-8jzy), ZIP Codes (unjd-c2ca); ZIPs covering >=5% of area"
+  },
+  "Hyde Park": {
+    "rent_psf_year": 35,
+    "income_index": 1.0,
+    "demand_index": 1.0,
+    "source": "Asking rent (not closed deals): 53rd/55th St listings $27-40.50",
+    "lat": 41.79482,
+    "lng": -87.59391,
+    "bbox": [
+      -87.60641,
+      41.78587,
+      -87.57516,
+      41.80263
+    ],
+    "community_area": "Hyde Park",
+    "community_area_number": 41,
+    "zip_codes": [
+      "60615",
+      "60637"
+    ],
+    "primary_zip": "60615",
+    "geo_source": "City of Chicago Data Portal: Boundaries - Neighborhoods (9wp7-iasj), Community Areas (igwz-8jzy), ZIP Codes (unjd-c2ca); ZIPs covering >=5% of area"
+  },
+  "Pilsen": {
+    "rent_psf_year": 23,
+    "income_index": 1.0,
+    "demand_index": 1.0,
+    "source": "Asking rent (not closed deals): 18th St listings $18-36, median",
+    "lat": 41.85027,
+    "lng": -87.66757,
+    "bbox": [
+      -87.68807,
+      41.8348,
+      -87.63516,
+      41.86002
+    ],
+    "community_area": "Lower West Side",
+    "community_area_number": 31,
+    "zip_codes": [
+      "60608",
+      "60616"
+    ],
+    "primary_zip": "60608",
+    "geo_source": "City of Chicago Data Portal: Boundaries - Neighborhoods (9wp7-iasj), Community Areas (igwz-8jzy), ZIP Codes (unjd-c2ca); ZIPs covering >=5% of area"
+  },
+  "Chinatown": {
+    "rent_psf_year": 28,
+    "income_index": 1.0,
+    "demand_index": 1.0,
+    "source": "Asking rent (not closed deals): Cermak restaurant space $32, Wentworth ~$24",
+    "lat": 41.85173,
+    "lng": -87.63519,
+    "bbox": [
+      -87.644,
+      41.84713,
+      -87.6292,
+      41.85778
+    ],
+    "community_area": "Armour Square",
+    "community_area_number": 34,
+    "zip_codes": [
+      "60616"
+    ],
+    "primary_zip": "60616",
+    "geo_source": "City of Chicago Data Portal: Boundaries - Neighborhoods (9wp7-iasj), Community Areas (igwz-8jzy), ZIP Codes (unjd-c2ca); ZIPs covering >=5% of area"
+  }
+}

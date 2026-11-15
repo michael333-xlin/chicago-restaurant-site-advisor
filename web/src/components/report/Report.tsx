@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { GapMatrix, Scatter } from '../../charts/Charts'
 import { RANK_COLORS } from '../../colors'
-import { SAMPLE_NOTICE } from '../../data/sample'
+import { dataMeta, dataNotice } from '../../data/blocks'
 import {
   CUISINE_LABEL, FORMAT_LABEL, RISK_LABEL, RISK_RULE, STOREFRONT_LABEL, type Assumption, type Report as R,
 } from '../../types'
@@ -93,7 +93,7 @@ export default function Report({ report, assumptions, onAssumptions, dirty, onRe
       <header className="report-head">
         <div className="badges">
           <span className="flag warn">Draft · consultant review required before sharing</span>
-          <span className="flag info">{SAMPLE_NOTICE}</span>
+          <span className="flag info">{dataNotice()}</span>
         </div>
         <h1>
           Site report · <span className="grad">{report.zip.zip}</span> <span className="muted">{report.zip.name}</span>
@@ -113,19 +113,26 @@ export default function Report({ report, assumptions, onAssumptions, dirty, onRe
       <section id="sec-summary" className="section">
         <div className="sec-title"><span>01</span><h2>Summary</h2></div>
         <Reveal>
-          {best ? (
+          {best && !report.topOverBudget ? (
             <p className="lead">
               Best fit for a {RISK_LABEL[inputs.risk].toLowerCase()} investor: a <b>{best.sqft.toLocaleString()} sq ft {STOREFRONT_LABEL[best.storefront].toLowerCase()}</b> near{' '}
               <b>{best.block.street.label}</b>, which pays back in <b>{monthsNum(best.payback.p50)} months</b> in the base case ({monthsNum(best.payback.p10)} optimistic, {monthsNum(best.payback.p90)} conservative) on a{' '}
               <b>{usd(best.startup.p50)}</b> startup budget.
             </p>
-          ) : (
+          ) : null}
+          {best && report.topOverBudget ? (
+            <p className="lead">
+              No plan fits a {usd(inputs.budgetMax)} ceiling in {report.zip.zip}. The {top.length} plans closest to the budget are simulated in full below and flagged{' '}
+              <b>over budget</b>; the cheapest, a {best.sqft.toLocaleString()} sq ft {STOREFRONT_LABEL[best.storefront].toLowerCase()} near <b>{best.block.street.label}</b>, needs about{' '}
+              <b>{usd(best.startup.p50)}</b> and pays back in <b>{monthsNum(best.payback.p50)} months</b> in the base case. Try a higher budget, a smaller floor area, or second-gen spaces.
+            </p>
+          ) : !best ? (
             <p className="lead">
               No plan fits a {usd(inputs.budgetMax)} ceiling in {report.zip.zip}. The cheapest simulated plan
               {report.cheapest ? <> ({report.cheapest.sqft.toLocaleString()} sq ft {STOREFRONT_LABEL[report.cheapest.storefront].toLowerCase()} near {report.cheapest.block.street.label}) needs about <b>{usd(report.cheapest.startup.p50)}</b></> : ' could not be built'}.
               Try a higher budget, a smaller floor area, or allowing second-gen spaces.
             </p>
-          )}
+          ) : null}
         </Reveal>
         <div className="stat-strip">
           <div><b><CountUp value={report.stats.blocks} format={num} /></b><span>blocks mapped</span></div>
@@ -197,8 +204,7 @@ export default function Report({ report, assumptions, onAssumptions, dirty, onRe
           <h4>How the numbers are made</h4>
           <p>
             All figures come from deterministic code; nothing is written by a language model. The ZIP is split into H3 resolution-10 blocks (about one city block each), and demand and
-            competition are summed over each block and its two surrounding rings (~300 m). Blocks without street-level commercial frontage are skipped
-            {inputs.liquor ? ', as are blocks on liquor-moratorium segments' : ''}.
+            competition are summed over each block and its two surrounding rings (~300 m). Blocks with no active food business within ~150 m are skipped as non-commercial.
           </p>
           <p>
             Stage 1 screens every block × floor size ({[...new Set(report.plans.map((p) => p.sqft))].map((s) => s.toLocaleString()).join(' / ')} sq ft) × storefront type with central assumptions and keeps the best
@@ -210,22 +216,35 @@ export default function Report({ report, assumptions, onAssumptions, dirty, onRe
             scaled by the block's expected-vs-open ratio for the concept (bounded) and by the chosen dayparts. Plans whose P50 startup cost exceeds the budget ceiling are dropped; P90 above the ceiling
             is flagged as overrun risk; P50 below the floor is flagged as budget headroom. Ranking uses {RISK_RULE[inputs.risk]}, keeping one plan per block.
           </p>
-          <h4>What this prototype does not know yet</h4>
           <p>
-            <b>Block data is synthetic.</b> Residents, jobs, incomes, restaurants, openings, closures, rents and liquor-moratorium segments are sample values generated from distance to the Loop, the arterial
-            street grid and smooth noise, so the report can be built end to end. They will be replaced by ACS, LODES, Overture, Chicago Food Inspections and Cook County Assessor data. ZIP boundaries
-            (2020 ZCTA) and the Chicago minimum wage are real.
+            Survival: a logistic model trained on Chicago Business License openings 2013–2022 estimates the chance that a new independent dine-in restaurant still holds its license after 1,000 days
+            (rolling out-of-time AUC {dataMeta()?.survivalModel.aucIndependent ?? '—'} for independents, Brier {dataMeta()?.survivalModel.brier ?? '—'} vs {dataMeta()?.survivalModel.brierConstant ?? '—'} for a constant).
+            Its inputs are ZIP context, ZIP survival history, cuisine, operator experience and the address's license history; operator and address inputs you leave blank use the ZIP average of
+            recent independent openings. This ZIP: {Math.round(report.survival.p * 100)}%{report.survival.source === 'api' ? ' with your inputs' : ''}. "Pays back while licensed" combines each payback draw
+            with a Kaplan–Meier curve of license durations scaled to that estimate (proportional hazards). The estimate is not used in the ranking.
+          </p>
+          <h4>Where the block data comes from</h4>
+          <ul className="sources">
+            {Object.entries(dataMeta()?.sources ?? {}).map(([k, v]) => (
+              <li key={k}><b>{k.replace(/_/g, ' ')}</b>: {v}</li>
+            ))}
+          </ul>
+          <p>
+            Expected restaurants per block = restaurants within ~300 m × the cuisine share that ZIPs with similar population, jobs, income and age mix
+            support (leave-one-ZIP-out Poisson model). Gap-model fit for this cuisine: correlation {(dataMeta()?.gapReliability[inputs.cuisine] ?? 0).toFixed(2)}
+            {(dataMeta()?.gapReliability[inputs.cuisine] ?? 1) < 0.4 ? ' — weak, treat the demand gap as indicative only' : ''}. Rent is ZIP level: live listings when fetched,
+            otherwise the team survey, otherwise the citywide median (flagged in the risks). Data snapshot {dataMeta()?.snapshotId ?? '—'}, exported {dataMeta()?.generatedAt ?? '—'}.
           </p>
           <p>
             Revenue is the weakest link: there is no POS data and no consultant project history, so revenue is a public-benchmark estimate and every revenue and payback figure is{' '}
-            <b>not calibrated to local operating data</b>. Industry benchmarks in the assumptions table are placeholders until each has a citable source. The demand model's ability to predict
-            where restaurants exist is not the same as predicting which restaurant makes money. Live listings, competitor menus and local risks need the phase-2 web search (Exa), and every web claim will
-            link to its source. Equipment condition, key money and license transfer for second-gen spaces need a site visit and negotiation.
+            <b>not calibrated to local operating data</b>. Every benchmark in the assumptions table shows its source and status (sourced, partly sourced with the derivation, or no public source); hover a source for the derivation. The demand model's ability to predict
+            where restaurants exist is not the same as predicting which restaurant makes money. Live listings, competitor openings and menu prices come from Exa web search once they have been fetched for a ZIP;
+            every web claim links to its source (see Evidence in each site card). Equipment condition, key money and license transfer for second-gen spaces need a site visit and negotiation.
           </p>
           <p className="disclaimer">Payback periods are scenarios under stated assumptions, not promises. This draft must be reviewed by a consultant before it is shared with a client.</p>
         </Reveal>
       </section>
-      <footer className="report-foot muted">Generated {new Date(report.generatedAt).toLocaleString('en-US')} · PlateGap prototype</footer>
+      <footer className="report-foot muted">Generated {new Date(report.generatedAt).toLocaleString('en-US')} · OpeningTable prototype</footer>
     </div>
   )
 }

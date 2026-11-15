@@ -4,10 +4,16 @@ import { AmbientLight, DirectionalLight, LightingEffect, type MapViewState, type
 import { H3HexagonLayer } from '@deck.gl/geo-layers'
 import { ColumnLayer, PathLayer, ScatterplotLayer, TextLayer } from '@deck.gl/layers'
 import { Map } from 'react-map-gl/maplibre'
+import { setWorkerUrl } from 'maplibre-gl'
+import maplibreWorker from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { overviewCells } from '../data/sample'
+import { dataNotice, overviewCells } from '../data/blocks'
 import { CUISINE_SHORT, type Block, type Cuisine, type PlanDetail, type ZipInfo } from '../types'
-import { gapColor, RANK_COLORS } from '../colors'
+import { gapColor, gapSpan, RANK_COLORS } from '../colors'
+import { useTween } from '../hooks'
+
+// maplibre-gl 6 resolves its worker relative to its own module; bundled builds must point at the emitted file.
+setWorkerUrl(maplibreWorker)
 
 const STYLE_LABELS = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 const STYLE_CLEAN = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json'
@@ -62,7 +68,13 @@ export default function CityMap(p: Props) {
   const sweep = useClock(scanning, 2200)
   const overview = useMemo(() => overviewCells(), [])
   const shown = useMemo(() => top.slice(0, revealed), [top, revealed])
-  const flat = focus != null ? 0.14 : 1
+  // flatten the blocks smoothly when a site is focused (elevationScale is a uniform: cheap to animate per frame)
+  const flat = useTween(focus != null ? 0.14 : 1, true, 700)
+  const dim = focus != null
+  // colour span from the data on screen: citywide eligible cells, or the open ZIP's eligible blocks
+  const citySpan = useMemo(() => gapSpan(overview.filter((o) => o.block.eligible).map((o) => o.block.cuisine[cuisine].expected - o.block.cuisine[cuisine].actual)), [overview, cuisine])
+  const zipSpan = useMemo(() => (blocks ? gapSpan(blocks.filter((b) => b.eligible).map((b) => b.cuisine[cuisine].expected - b.cuisine[cuisine].actual)) : citySpan), [blocks, cuisine, citySpan])
+  const COLOR_T = { duration: 700, easing: (u: number) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2) }
 
   const overviewLayer = useMemo(
     () =>
@@ -76,16 +88,17 @@ export default function CityMap(p: Props) {
         pickable: true,
         getElevation: (d) => 60 + Math.sqrt(Math.max(0, d.block.cuisine[cuisine].expected)) * 950,
         getFillColor: (d) => {
-          const c = gapColor(d.block.cuisine[cuisine].expected - d.block.cuisine[cuisine].actual, 225, 4)
+          const c = gapColor(d.block.cuisine[cuisine].expected - d.block.cuisine[cuisine].actual, 225, citySpan)
           if (zip && d.zip !== zip.zip) return [c[0], c[1], c[2], 70]
           return c
         },
-        updateTriggers: { getElevation: cuisine, getFillColor: [cuisine, zip?.zip] },
+        updateTriggers: { getElevation: cuisine, getFillColor: [cuisine, zip?.zip, citySpan] },
         material: { ambient: 0.5, diffuse: 0.7, shininess: 40, specularColor: [255, 220, 180] },
-        transitions: { getElevation: { duration: 1200, enter: () => [0] } },
+        transitions: { getElevation: { duration: 1200, enter: () => [0] }, getFillColor: COLOR_T },
         onClick: (info) => info.object && onPickZip?.(info.object.zip),
       }),
-    [overview, mode, cuisine, zip, onPickZip],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- COLOR_T is a constant
+    [overview, mode, cuisine, zip, onPickZip, citySpan],
   )
 
   const outline = useMemo(
@@ -121,15 +134,16 @@ export default function CityMap(p: Props) {
             getFillColor: (d) => {
               const i = shown.findIndex((t) => t.block.h3 === d.h3)
               if (i >= 0) return [...RANK_COLORS[i], 255] as [number, number, number, number]
-              if (!d.eligible) return [58, 64, 82, flat < 1 ? 40 : 90]
-              return gapColor(d.cuisine[cuisine].expected - d.cuisine[cuisine].actual, flat < 1 ? 150 : 228, 4)
+              if (!d.eligible) return [58, 64, 82, dim ? 40 : 90]
+              return gapColor(d.cuisine[cuisine].expected - d.cuisine[cuisine].actual, dim ? 150 : 228, zipSpan)
             },
-            updateTriggers: { getElevation: [cuisine, revealed], getFillColor: [cuisine, revealed, flat] },
+            updateTriggers: { getElevation: [cuisine, revealed], getFillColor: [cuisine, revealed, dim, zipSpan] },
             material: { ambient: 0.45, diffuse: 0.75, shininess: 60, specularColor: [255, 220, 180] },
-            transitions: { getElevation: { duration: 1400, enter: () => [0] } },
+            transitions: { getElevation: { duration: 1400, enter: () => [0] }, getFillColor: COLOR_T },
           })
         : null,
-    [blocks, mode, zip, cuisine, topSet, shown, revealed, flat],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- COLOR_T is a constant
+    [blocks, mode, zip, cuisine, topSet, shown, revealed, flat, dim, zipSpan],
   )
 
   const shortlistLayer = useMemo(
@@ -154,7 +168,7 @@ export default function CityMap(p: Props) {
     const data = shown.map((t, i) => ({ t, i, color: RANK_COLORS[i] }))
     type D = (typeof data)[number]
     const pos = (d: D, z = 0): [number, number, number] => [d.t.block.lon, d.t.block.lat, z]
-    const beacon = BEACON * (flat < 1 ? 0.45 : 1)
+    const beacon = BEACON * (dim ? 0.45 : 1)
     const focused = focus != null ? data.filter((d) => d.i === focus) : []
     return [
       new ScatterplotLayer<D>({
@@ -243,7 +257,7 @@ export default function CityMap(p: Props) {
         parameters: NO_DEPTH,
       }),
     ]
-  }, [mode, shown, pulse, focus, onPickSite, flat])
+  }, [mode, shown, pulse, focus, onPickSite, dim])
 
   const scanLayer = useMemo(() => {
     if (!scanning || !zip) return null
@@ -273,14 +287,14 @@ export default function CityMap(p: Props) {
     if (layer.id === 'overview') {
       const o = object as (typeof overview)[number]
       const c = o.block.cuisine[cuisine]
-      return { html: `<b>ZIP ${o.zip}</b><br/>${name}: ${c.actual} open vs ${c.expected.toFixed(1)} expected nearby<br/><span style="opacity:.55">Click to choose this ZIP · sample data</span>`, style }
+      return { html: `<b>ZIP ${o.zip}</b><br/>${name}: ${c.actual} open vs ${c.expected.toFixed(1)} expected nearby<br/><span style="opacity:.55">Click to choose this ZIP · ${dataNotice()}</span>`, style }
     }
     if (layer.id.startsWith('blocks-')) {
       const b = object as Block
       const c = b.cuisine[cuisine]
       const gap = c.expected - c.actual
       return {
-        html: `<b>${b.street.label}</b> <span style="opacity:.55">${b.street.grid}</span><br/>${name} within ~300 m: ${c.actual} open · ${c.expected.toFixed(1)} expected · gap <b>${gap >= 0 ? '+' : ''}${gap.toFixed(1)}</b><br/>Rent est. $${b.rentPsf}/sq ft/yr${b.eligible ? '' : ' · <i>no commercial frontage</i>'}${b.liquorMoratorium ? '<br/><span style="color:#ff8a95">Liquor moratorium segment</span>' : ''}<br/><span style="opacity:.5">Sample data</span>`,
+        html: `<b>${b.street.label}</b> <span style="opacity:.55">${b.street.grid}</span><br/>${name} within ~300 m: ${c.actual} open · ${c.expected.toFixed(1)} expected · gap <b>${gap >= 0 ? '+' : ''}${gap.toFixed(1)}</b><br/>Rent est. $${b.rentPsf}/sq ft/yr (${b.rentKind})${b.eligible ? '' : ' · <i>no food businesses nearby</i>'}${b.liquorMoratorium ? '<br/><span style="color:#ff8a95">Liquor moratorium segment</span>' : ''}<br/><span style="opacity:.5">${dataNotice()}</span>`,
         style,
       }
     }

@@ -19,6 +19,14 @@ export function gapColor(gap: number, alpha = 220, span = 3): RGBA {
   return [c[0], c[1], c[2], alpha]
 }
 
+/** Colour span for a set of gaps: 90th percentile of |gap|, so the scale uses its full range for the data shown
+ *  (a fixed span leaves most blocks grey citywide and saturates dense ZIPs). */
+export function gapSpan(gaps: number[], floor = 0.25) {
+  const a = gaps.filter(Number.isFinite).map(Math.abs).sort((x, y) => x - y)
+  if (!a.length) return 1
+  return Math.max(floor, a[Math.min(a.length - 1, Math.floor(0.9 * (a.length - 1)))])
+}
+
 export const legendStops = (span = 3) =>
   [-1, -0.5, 0, 0.33, 0.66, 1].map((k) => {
     const [r, g, b] = gapColor(k * span, 255, span)

@@ -1,0 +1,15 @@
+.env
+.env.local
+node_modules/
+__pycache__/
+.venv/
+.DS_Store
+*.csv
+# downloaded data, live records and model outputs live on the server disk, not in git
+data/*
+output/
+web/dist/
+# ...except the Overture seed file the server needs on first start, and the finance tables
+!data/seed/
+!data/seed/*.csv
+!finance/*.csv

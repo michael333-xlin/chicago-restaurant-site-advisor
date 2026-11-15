@@ -46,13 +46,14 @@ export default function Assumptions({ list, onChange, dirty, onRecalc }: Props) 
       }),
     )
   }
-  const verified = list.filter((a) => a.verified).length
+  const count = (st: Assumption['status']) => list.filter((a) => a.status === st).length
   const edited = list.filter((a) => a.edited).length
   return (
     <div className="assumptions">
       <div className="as-bar">
         <span>
-          <b>{list.length}</b> parameters · <b className="ok">{verified}</b> verified · <b className="warn">{list.length - verified}</b> placeholders
+          <b>{list.length}</b> parameters · <b className="ok">{count('sourced')}</b> sourced · <b className="ok">{count('partial')}</b> partly sourced ·{' '}
+          <b className="warn">{count('unsourced')}</b> no public source
           {edited > 0 && <> · <b className="edit">{edited}</b> edited by consultant</>}
         </span>
         <button className={`cta small ${dirty ? '' : 'idle'}`} disabled={!dirty} onClick={onRecalc}>
@@ -76,9 +77,14 @@ export default function Assumptions({ list, onChange, dirty, onRecalc }: Props) 
                     </td>
                   ))}
                   <td className="muted">{a.unit}</td>
-                  <td className="src">{a.source}{a.date !== '—' && <em>{a.date}</em>}</td>
+                  <td className="src" title={a.note}>
+                    {a.url ? <a href={a.url} target="_blank" rel="noreferrer">{a.source}</a> : a.source}
+                    {a.date !== '—' && <em>{a.date}</em>}
+                  </td>
                   <td>
-                    <span className={`flag ${a.edited ? 'edit' : a.verified ? 'ok' : 'warn'}`}>{a.edited ? 'Edited' : a.verified ? 'Verified' : 'Placeholder'}</span>
+                    <span className={`flag ${a.edited ? 'edit' : a.status === 'unsourced' ? 'warn' : 'ok'}`} title={a.note}>
+                      {a.edited ? 'Edited' : a.status === 'sourced' ? 'Sourced' : a.status === 'partial' ? 'Partly sourced' : 'No source'}
+                    </span>
                   </td>
                 </tr>
               ))}

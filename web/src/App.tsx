@@ -1,18 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { FlyToInterpolator, LinearInterpolator, WebMercatorViewport, type MapViewState } from '@deck.gl/core'
-import CityMap from './components/CityMap'
 import Intake from './components/Intake'
 import Analyzing from './components/Analyzing'
 import Report, { type Focus } from './components/report/Report'
-import { SAMPLE_NOTICE, ZIP_BY_CODE, zipBlocks } from './data/sample'
+import { dataNotice, loadBase, loadSurvival, loadZip, ZIP_BY_CODE, zipBlocks } from './data/blocks'
 import { buildAssumptions } from './model/assumptions'
 import { runAnalysis } from './model/engine'
 import { legendStops, RANK_COLORS } from './colors'
 import { CUISINE_SHORT, type Assumption, type Inputs, type Report as R } from './types'
 
+// deck.gl layers + maplibre load in their own chunk; the intake form renders while they download.
+const CityMap = lazy(() => import('./components/CityMap'))
+
 type Stage = 'intake' | 'analyzing' | 'report'
 
 const HOME: MapViewState = { longitude: -87.79, latitude: 41.84, zoom: 10.05, pitch: 56, bearing: -16 }
+const easeInOutCubic = (u: number) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2)
 const DEFAULT_INPUTS: Inputs = {
   zip: '60614',
   budgetMin: 300_000,
@@ -25,6 +28,7 @@ const DEFAULT_INPUTS: Inputs = {
   liquor: true,
   dayparts: ['lunch', 'dinner'],
   risk: 'balanced',
+  operator: { priorLicenses: null, entity: null, address: '' },
 }
 
 type Box = [number, number, number, number]
@@ -49,11 +53,31 @@ export default function App() {
   const [focus, setFocus] = useState<Focus>('summary')
   const [camera, setCamera] = useState<MapViewState>(HOME)
   const [error, setError] = useState<string | null>(null)
+  const [ready, setReady] = useState(false)
+  const [loadMsg, setLoadMsg] = useState('Loading Chicago data…')
+
+  // Real block data (meta + citywide overview) must be loaded before the map can render.
+  // On a fresh deployment the server is still preparing it (HTTP 503), so keep retrying.
+  useEffect(() => {
+    let stop = false
+    const attempt = () =>
+      loadBase()
+        .then(() => !stop && setReady(true))
+        .catch((e: Error) => {
+          if (stop) return
+          setLoadMsg(`${e.message} Retrying in 15 s…`)
+          setTimeout(attempt, 15000)
+        })
+    attempt()
+    return () => {
+      stop = true
+    }
+  }, [])
   const zip = ZIP_BY_CODE.get(stage === 'intake' ? inputs.zip : (report?.inputs.zip ?? inputs.zip)) ?? null
   const blocks = useMemo(() => (stage !== 'intake' && report ? zipBlocks(report.inputs.zip) : null), [stage, report])
 
   const fly = useCallback((target: Partial<MapViewState>, duration = 2200) => {
-    setCamera((v) => ({ ...v, ...target, transitionDuration: duration, transitionInterpolator: new FlyToInterpolator({ speed: 1.2 }) }) as MapViewState)
+    setCamera((v) => ({ ...v, ...target, transitionDuration: duration, transitionEasing: easeInOutCubic, transitionInterpolator: new FlyToInterpolator({ speed: 1.2 }) }) as MapViewState)
   }, [])
 
   const fitTo = useCallback(
@@ -62,10 +86,17 @@ export default function App() {
       const narrow = window.innerWidth <= 1180
       const width = docked && !narrow ? window.innerWidth * 0.44 : window.innerWidth
       const height = docked && narrow ? window.innerHeight * 0.45 : window.innerHeight
+      // Hidden or minimized window: there is nothing to fit (fitBounds asserts a positive target size).
+      if (width < 120 || height < 120) return
       const vp = new WebMercatorViewport({ width, height })
-      const safe = { ...pad }
-      if (safe.left + safe.right > width - 80) safe.left = safe.right = 40
-      const f = vp.fitBounds([[box[0], box[1]], [box[2], box[3]]], { padding: safe })
+      // Shrink each pair of paddings proportionally so at least 40 px of map stays visible in each direction.
+      const shrink = (a: number, b: number, size: number): [number, number] => {
+        const room = size - 40
+        return a + b <= room ? [a, b] : [(a * room) / (a + b), (b * room) / (a + b)]
+      }
+      const [left, right] = shrink(pad.left, pad.right, width)
+      const [top, bottom] = shrink(pad.top, pad.bottom, height)
+      const f = vp.fitBounds([[box[0], box[1]], [box[2], box[3]]], { padding: { left, right, top, bottom } })
       fly({ longitude: f.longitude, latitude: f.latitude, zoom: Math.min(f.zoom, maxZoom), ...extra }, duration)
     },
     [fly, stage],
@@ -97,10 +128,11 @@ export default function App() {
   const submit = () => {
     setBusy(true)
     setError(null)
-    setTimeout(() => {
-      try {
+    loadZip(inputs.zip)
+      .then((blocks) => loadSurvival(inputs.zip, inputs.cuisine, inputs.operator, blocks))
+      .then((survival) => {
         const list = mergeEdits(buildAssumptions(inputs), assumptions)
-        const r = runAnalysis(inputs, list)
+        const r = runAnalysis(inputs, list, survival)
         setAssumptions(list)
         setDirty(false)
         setReport(r)
@@ -109,12 +141,9 @@ export default function App() {
         setSite(0)
         setStage('analyzing')
         fitTo(r.zip.bbox, { left: 80, right: 500, top: 100, bottom: 80 }, 15.1, { pitch: 58, bearing: -22 }, 2600)
-      } catch (e) {
-        setError((e as Error).message)
-      } finally {
-        setBusy(false)
-      }
-    }, 40)
+      })
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setBusy(false))
   }
 
   const onReveal = useCallback((n: number) => setRevealed(n), [])
@@ -143,7 +172,7 @@ export default function App() {
 
   const recalc = () => {
     if (!report || !assumptions) return
-    const r = runAnalysis(report.inputs, assumptions)
+    const r = runAnalysis(report.inputs, assumptions, report.survival)
     setReport(r)
     setRevealed(r.top.length)
     setSite((s) => Math.min(s, Math.max(0, r.top.length - 1)))
@@ -173,6 +202,8 @@ export default function App() {
   return (
     <div className={`app stage-${stage}`}>
       <div className="map-wrap">
+        {ready ? (
+        <Suspense fallback={<div className="loading-city">Loading map…</div>}>
         <CityMap
           camera={camera}
           mode={stage === 'intake' ? 'city' : 'zip'}
@@ -187,11 +218,15 @@ export default function App() {
           onPickSite={pickSite}
           onPickZip={stage === 'intake' ? pickZip : undefined}
         />
+        </Suspense>
+        ) : (
+          <div className="loading-city">{loadMsg}</div>
+        )}
         <div className="vignette" />
         <div className="map-hud">
           <div className="brand">
             <span className="logo" />
-            <span>Plate<span className="grad">Gap</span></span>
+            <span>Opening<span className="grad">Table</span></span>
           </div>
           <div className="legend">
             <span className="muted">{CUISINE_SHORT[cuisine]} · saturated</span>
@@ -207,12 +242,12 @@ export default function App() {
               ))}
             </div>
           )}
-          <div className="sample-badge">{SAMPLE_NOTICE}</div>
+          <div className="sample-badge">{dataNotice()}</div>
         </div>
       </div>
 
       {stage === 'intake' && <div className="scrim" />}
-      {stage === 'intake' && <Intake inputs={inputs} onChange={changeInputs} onSubmit={submit} busy={busy} />}
+      {stage === 'intake' && ready && <Intake inputs={inputs} onChange={changeInputs} onSubmit={submit} busy={busy} />}
       {stage === 'analyzing' && report && <Analyzing report={report} onReveal={onReveal} onDone={onAnalysisDone} onOpen={openReport} />}
       {stage === 'report' && report && assumptions && (
         <Report

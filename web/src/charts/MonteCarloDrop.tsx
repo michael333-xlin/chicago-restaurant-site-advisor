@@ -3,7 +3,12 @@ import { paybackColor } from '../colors'
 import { reducedMotion } from '../format'
 import { useInView } from '../hooks'
 
-type Props = { samples: number[]; horizon: number; height?: number; label?: string }
+type Props = { samples: number[]; closures?: number[]; horizon: number; height?: number; label?: string }
+
+// A draw whose license ends (survival model) before it pays back is drawn in this colour instead of its payback colour.
+const LAPSE = 'rgba(132,146,255,1)'
+const easeInOutCubic = (u: number) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2)
+const easeOutCubic = (u: number) => 1 - Math.pow(1 - u, 3)
 
 type Layout = {
   w: number; h: number; left: number; right: number; top: number; base: number
@@ -43,13 +48,22 @@ function q(sorted: number[], p: number) {
   return sorted[i]
 }
 
-export default function MonteCarloDrop({ samples, horizon, height = 320, label = 'Months from opening to payback' }: Props) {
+export default function MonteCarloDrop({ samples, closures, horizon, height = 320, label = 'Months from opening to payback' }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const counterRef = useRef<HTMLSpanElement>(null)
   const [inViewRef, inView] = useInView<HTMLDivElement>({ threshold: 0.35 })
   const [run, setRun] = useState(0)
   const [done, setDone] = useState(false)
+
+  const lapsedFirst = (i: number) => {
+    const s = samples[i], c = closures?.[i]
+    return c != null && Number.isFinite(s) && s <= horizon && c < s
+  }
+  const n = samples.length
+  const nNever = samples.filter((s) => !(Number.isFinite(s) && s <= horizon)).length
+  const nLapsed = closures ? samples.reduce((a, _, i) => a + (lapsedFirst(i) ? 1 : 0), 0) : 0
+  const share = (k: number) => `${Math.round((100 * k) / Math.max(1, n))}%`
 
   const replay = useCallback(() => {
     setDone(false)
@@ -103,7 +117,7 @@ export default function MonteCarloDrop({ samples, horizon, height = 320, label =
       const spawn = SPAWN_SPAN * Math.pow(i / N, 0.62)
       return {
         i, spawn, dur: 700 + ((i * 7919) % 300), x0: nozzleX + (((i * 104729) % 41) - 20), y0: 8,
-        x1, y1, color: paybackColor(finite ? s : Infinity), px: nozzleX, py: 8, landed: false,
+        x1, y1, color: lapsedFirst(i) ? LAPSE : paybackColor(finite ? s : Infinity), px: nozzleX, py: 8, landed: false,
       }
     })
 
@@ -117,6 +131,13 @@ export default function MonteCarloDrop({ samples, horizon, height = 320, label =
       c.beginPath()
       c.arc(x, y, r, 0, Math.PI * 2)
       c.fill()
+    }
+    // soft halo for falling dots: one translucent disc instead of canvas shadowBlur (which is slow per dot)
+    const drawGlow = (x: number, y: number, color: string) => {
+      ctx.fillStyle = color.replace(/,\s*1\)$/, ',0.22)')
+      ctx.beginPath()
+      ctx.arc(x, y, r * 2.4, 0, Math.PI * 2)
+      ctx.fill()
     }
 
     const xOf = (m: number) => (Number.isFinite(m) && m <= horizon ? L.left + m * L.binW : L.overX + L.overW / 2)
@@ -245,17 +266,17 @@ export default function MonteCarloDrop({ samples, horizon, height = 320, label =
           active.splice(j, 1)
         }
       }
-      for (const f of flashes) f.t += dt / 320
+      for (const f of flashes) f.t += dt / 420
       for (let j = flashes.length - 1; j >= 0; j--) if (flashes[j].t >= 1) flashes.splice(j, 1)
-      updateLines(false, 0.12)
+      updateLines(false, 1 - Math.exp(-dt / 160))   // time-based easing: same speed at any frame rate
       const finished = next >= N && active.length === 0
       drawFrame(finished)
       // falling particles with trails
       for (const pt of active) {
         const u = Math.min(1, (t - pt.spawn) / pt.dur)
-        const ex = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2
-        const x = pt.x0 + (pt.x1 - pt.x0) * ex
-        const y = pt.y0 + (pt.y1 - pt.y0) * u * u
+        // ease in and out on both axes: dots accelerate, then settle onto the pile instead of hitting it at full speed
+        const x = pt.x0 + (pt.x1 - pt.x0) * easeOutCubic(u)
+        const y = pt.y0 + (pt.y1 - pt.y0) * easeInOutCubic(u)
         // Trail along the direction of travel, capped so low frame rates don't draw long streaks.
         const dx = x - pt.px, dy = y - pt.py
         const len = Math.hypot(dx, dy) || 1
@@ -271,10 +292,8 @@ export default function MonteCarloDrop({ samples, horizon, height = 320, label =
         ctx.moveTo(tx, ty)
         ctx.lineTo(x, y)
         ctx.stroke()
-        ctx.shadowColor = pt.color
-        ctx.shadowBlur = 8
+        drawGlow(x, y, pt.color)
         drawDot(ctx, x, y, pt.color)
-        ctx.shadowBlur = 0
         pt.px = x
         pt.py = y
       }
@@ -297,7 +316,8 @@ export default function MonteCarloDrop({ samples, horizon, height = 320, label =
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [inView, samples, horizon, height, run])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- lapsedFirst only reads samples / closures / horizon
+  }, [inView, samples, closures, horizon, height, run])
 
   return (
     <div className="mc" ref={inViewRef}>
@@ -307,6 +327,13 @@ export default function MonteCarloDrop({ samples, horizon, height = 320, label =
           <div className="mc-count">
             <span ref={counterRef}>0</span> / {samples.length.toLocaleString('en-US')} draws
           </div>
+          {closures && (
+            <div className="mc-legend">
+              <span><i style={{ background: paybackColor(30) }} />pays back before the license ends {share(n - nNever - nLapsed)}</span>
+              <span><i style={{ background: LAPSE }} />license ends first (survival model) {share(nLapsed)}</span>
+              <span><i style={{ background: paybackColor(Infinity) }} />no payback in {horizon / 12} yrs {share(nNever)}</span>
+            </div>
+          )}
         </div>
         <button className="ghost-btn" onClick={replay} disabled={!done}>
           ↻ Replay

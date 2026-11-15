@@ -1,14 +1,16 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import MonteCarloDrop from '../../charts/MonteCarloDrop'
 import { FanChart, Gauge, StartupBar, Tornado, Waterfall } from '../../charts/Charts'
 import { RANK_COLORS } from '../../colors'
 import { CUISINE_LABEL, CUISINE_SHORT, FORMAT_LABEL, STOREFRONT_LABEL, type Plan, type PlanDetail, type Report } from '../../types'
 import { months, monthsNum, num, pct, usd, usdFull } from '../../format'
 import { CountUp, Reveal } from '../../ui'
+import { loadEvidence, rentInfo, type Evidence } from '../../data/blocks'
 
 const Storefront3D = lazy(() => import('../Storefront3D'))
 
 const FLAG_TEXT: Record<Plan['flags'][number], { text: string; tone: 'warn' | 'info' | 'bad' }> = {
+  over_budget: { text: 'Over budget', tone: 'bad' },
   overrun_risk: { text: 'Overrun risk', tone: 'warn' },
   budget_headroom: { text: 'Budget headroom', tone: 'info' },
   same_address_closures: { text: 'Same address closed repeatedly', tone: 'bad' },
@@ -22,6 +24,44 @@ export function Flags({ plan }: { plan: Plan }) {
         <span key={f} className={`flag ${FLAG_TEXT[f].tone}`}>{FLAG_TEXT[f].text}</span>
       ))}
     </>
+  )
+}
+
+function EvidenceList({ zip }: { zip: string }) {
+  const [ev, setEv] = useState<Evidence | null | undefined>(undefined)
+  useEffect(() => {
+    let alive = true
+    loadEvidence(zip).then((e) => alive && setEv(e))
+    return () => {
+      alive = false
+    }
+  }, [zip])
+  if (ev === undefined) return <p className="muted">Loading live evidence…</p>
+  const items = ev
+    ? [
+        ...ev.rents.map((r) => ({ tag: 'Rent', date: r.observed_date, text: `$${r.rent_psf_year}/sq ft/yr asking`, url: r.source_url })),
+        ...ev.prices.map((r) => ({ tag: 'Price', date: r.observed_date, text: `$${r.avg_ticket_usd} average ticket${r.name ? ` · ${r.name}` : ''}`, url: r.source_url })),
+        ...ev.places.map((r) => ({ tag: r.status === 'closed' ? 'Closed' : 'Opened', date: r.event_date, text: r.name ?? '', url: r.source_url })),
+        ...ev.signals.map((r) => ({ tag: r.kind ?? 'News', date: r.published_date, text: r.title ?? r.summary ?? '', url: r.source_url })),
+      ].sort((x, y) => String(y.date ?? '').localeCompare(String(x.date ?? '')))
+    : []
+  if (!items.length)
+    return (
+      <p className="muted">
+        No live records for ZIP {zip} yet. Fetch them with <code>python3 advantage/agent_api.py fetch --zip5 {zip} --cuisine …</code> or{' '}
+        <code>POST /api/live/fetch</code> (see README). Nothing is shown without a source link.
+      </p>
+    )
+  return (
+    <ul className="evidence">
+      {items.slice(0, 12).map((it, n) => (
+        <li key={`${it.url}-${n}`}>
+          <span className="pill">{it.tag}</span>
+          <a href={it.url} target="_blank" rel="noreferrer">{it.text || it.url}</a>
+          <em>{it.date ?? ''}</em>
+        </li>
+      ))}
+    </ul>
   )
 }
 
@@ -85,6 +125,7 @@ export default function SiteDeepDive({ report, index, onIndex }: { report: Repor
   const cs = t.block.cuisine[inputs.cuisine]
   const hourly = t.staff.filter((s) => !s.salaried)
   const laborTotal = t.pnl.labor
+  const rent = rentInfo(t.block.zip)
   return (
     <div className="deep" style={{ ['--accent' as string]: accent }}>
       <div className="site-tabs">
@@ -144,12 +185,15 @@ export default function SiteDeepDive({ report, index, onIndex }: { report: Repor
       </Block>
 
       <Block title="When does it pay back?" eyebrow={`Payback · ${num(report.draws)} simulations`} className="wide">
-        <MonteCarloDrop key={t.id} samples={t.samples} horizon={report.horizon} />
+        <MonteCarloDrop key={t.id} samples={t.samples} closures={t.closures} horizon={report.horizon} />
         <div className="scenarios">
           <div className="sc opt"><span>Optimistic · P10</span><b>{months(t.payback.p10)}</b></div>
           <div className="sc base"><span>Base · P50</span><b>{months(t.payback.p50)}</b></div>
           <div className="sc cons"><span>Conservative · P90</span><b>{months(t.payback.p90)}</b></div>
           <div className="sc never"><span>No payback in 5 yrs</span><b>{pct(t.noPaybackProb)}</b></div>
+          <div className="sc base" title="Share of draws that pay back before their license ends. Each draw samples a license end from the survival model's curve for this ZIP (Kaplan-Meier of license durations, scaled to the 1,000-day estimate)">
+            <span>Pays back before license ends</span><b>{pct(t.licensedAtPayback)}</b>
+          </div>
         </div>
       </Block>
 
@@ -188,7 +232,7 @@ export default function SiteDeepDive({ report, index, onIndex }: { report: Repor
               </div>
             ))}
           </div>
-          <p className="muted small">Percentiles vs. citywide blocks. Uses spending-related traits only (income, age, workers, students, visitors, transit), never race or ethnicity.</p>
+          <p className="muted small">Percentiles vs. citywide blocks. Uses spending-related traits only (earnings, age, workers, transit), never race or ethnicity.</p>
         </Block>
       </div>
 
@@ -197,9 +241,15 @@ export default function SiteDeepDive({ report, index, onIndex }: { report: Repor
           <div className="rent">
             <div><span>Base rent</span><b>${t.block.rentPsf}</b><em>/sq ft/yr</em></div>
             <div><span>Monthly incl. NNN</span><b>{usd(t.rentMonthly)}</b><em>{t.sqft.toLocaleString()} sq ft</em></div>
-            <div className="pending"><span>Listing comparison</span><b>—</b><em>Exa listing search · phase 2</em></div>
+            {rent?.kind === 'live' ? (
+              <div><span>Live listings</span><b>{rent.n}</b><em>median ${rent.psf}/sq ft/yr</em></div>
+            ) : (
+              <div className="pending"><span>Live listings</span><b>—</b><em>not fetched for this ZIP yet</em></div>
+            )}
           </div>
-          <p className="muted small">Estimate from the sample rent surface; the pipeline will use Cook County Assessor commercial valuations, flagged when live listings differ.</p>
+          <p className="muted small">
+            {rent ? `${rent.kind === 'fallback' ? 'Fallback — ' : ''}${rent.source}.` : 'ZIP-level rent.'} Rent is ZIP level, not block level; replace it with the asking rent of the actual space.
+          </p>
         </Block>
         <Block title="Labor" eyebrow={`${usd(laborTotal)}/mo incl. employer taxes · ${pct(laborTotal / t.pnl.revenue)} of revenue`}>
           <table className="staff">
@@ -215,7 +265,7 @@ export default function SiteDeepDive({ report, index, onIndex }: { report: Repor
               ))}
             </tbody>
           </table>
-          <p className="muted small">Chicago minimum wage $17.05/hr, tipped $12.96/hr (from 2026-07-01). Other wages are placeholders pending BLS OEWS.</p>
+          <p className="muted small">Chicago minimum wage $17.05/hr, tipped $12.96/hr (from 2026-07-01). Cook, shift-lead, manager and kitchen-manager pay: BLS OEWS May 2025, Chicago MSA (25th percentile–median–75th percentile).</p>
         </Block>
       </div>
 
@@ -260,16 +310,8 @@ export default function SiteDeepDive({ report, index, onIndex }: { report: Repor
         </Block>
       </div>
 
-      <Block title="Evidence" eyebrow="Live web verification" className="wide">
-        <ul className="evidence">
-          {[
-            `Retail listings near ${t.block.street.label}, ${Math.round(t.sqft * 0.8).toLocaleString()}–${Math.round(t.sqft * 1.2).toLocaleString()} sq ft, incl. second-gen restaurant spaces and key money`,
-            `${CUISINE_SHORT[inputs.cuisine]} openings, closures and menu prices within ~300 m`,
-            `Construction, development projects and liquor rules near ${t.block.street.label}`,
-          ].map((q) => (
-            <li key={q}><span className="pill">Phase 2</span>{q}<em>Exa search not connected — no claims shown without a source link.</em></li>
-          ))}
-        </ul>
+      <Block title="Evidence" eyebrow="Live web data (Exa) · every claim links to its source" className="wide">
+        <EvidenceList zip={t.block.zip} />
       </Block>
     </div>
   )

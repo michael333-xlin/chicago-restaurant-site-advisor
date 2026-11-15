@@ -1,0 +1,12 @@
+# Python 3.11-3.14. Versions pinned to the ones the models were trained and tested with.
+numpy==2.4.6
+pandas==3.0.3
+scikit-learn==1.9.0
+scipy==1.18.0
+statsmodels==0.14.6
+pyarrow==23.0.1
+matplotlib==3.11.0
+requests==2.34.2
+h3==4.5.0
+fastapi==0.163.0
+uvicorn[standard]==0.40.0
