@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { FlyToInterpolator, LinearInterpolator, WebMercatorViewport, type MapViewState } from '@deck.gl/core'
+import ErrorBoundary from './components/ErrorBoundary'
 import Intake from './components/Intake'
 import Analyzing from './components/Analyzing'
 import Report, { type Focus } from './components/report/Report'
@@ -203,6 +204,7 @@ export default function App() {
     <div className={`app stage-${stage}`}>
       <div className="map-wrap">
         {ready ? (
+        <ErrorBoundary label="The map">
         <Suspense fallback={<div className="loading-city">Loading map…</div>}>
         <CityMap
           camera={camera}
@@ -219,6 +221,7 @@ export default function App() {
           onPickZip={stage === 'intake' ? pickZip : undefined}
         />
         </Suspense>
+        </ErrorBoundary>
         ) : (
           <div className="loading-city">{loadMsg}</div>
         )}
@@ -250,6 +253,7 @@ export default function App() {
       {stage === 'intake' && ready && <Intake inputs={inputs} onChange={changeInputs} onSubmit={submit} busy={busy} />}
       {stage === 'analyzing' && report && <Analyzing report={report} onReveal={onReveal} onDone={onAnalysisDone} onOpen={openReport} />}
       {stage === 'report' && report && assumptions && (
+        <ErrorBoundary label="The report">
         <Report
           report={report}
           assumptions={assumptions}
@@ -264,6 +268,7 @@ export default function App() {
           onFocus={setFocus}
           onEdit={editInputs}
         />
+        </ErrorBoundary>
       )}
       {error && <div className="toast" onClick={() => setError(null)}>{error}</div>}
     </div>

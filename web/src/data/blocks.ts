@@ -13,7 +13,7 @@ type RawZip = { zip: string; center: [number, number]; bbox: [number, number, nu
 export const ZIPS: ZipInfo[] = (rawZips as RawZip[]).map((z) => ({ ...z, name: ZIP_NAMES[z.zip] ?? 'Chicago' }))
 export const ZIP_BY_CODE = new Map(ZIPS.map((z) => [z.zip, z]))
 
-export type RentInfo = { psf: number; kind: 'live' | 'survey' | 'fallback'; source: string; urls: string[]; n?: number }
+export type RentInfo = { psf: number; kind: 'survey' | 'fallback'; source: string; urls: string[] }
 export type Meta = {
   generatedAt: string
   asOf: string
@@ -22,14 +22,11 @@ export type Meta = {
   notice: string
   gapReliability: Record<Cuisine, number>
   rentByZip: Record<string, RentInfo>
-  liveCounts: Record<string, { n: number; latest_ingested: string | null }>
   ctaWindow: string[]
   licenseCurve: { S: number[]; S1000d: number; check: Record<string, { pred_mean: number; obs_mean: number; quintile_abs_err: number; auc: number }> }
   survivalModel: { kind: string; featureSet: string; aucIndependent: number; aucAll: number; brier: number; brierConstant: number }
   sources: Record<string, string>
 }
-export type EvidenceItem = { title?: string; source_url: string; published_date?: string; observed_date?: string; event_date?: string; kind?: string; summary?: string; rent_psf_year?: number; avg_ticket_usd?: number; name?: string; status?: string }
-export type Evidence = { rents: EvidenceItem[]; prices: EvidenceItem[]; places: EvidenceItem[]; signals: EvidenceItem[]; rent: RentInfo | null }
 
 type RawBlock = Omit<Block, 'street'>
 type OverviewCell = { h3: string; zip: string; block: Block }
@@ -65,7 +62,7 @@ export async function loadZip(zip: string): Promise<Block[]> {
   return blocks
 }
 
-/** Drop cached data so the next load picks up a fresh export (after live data was ingested). */
+/** Drop cached data so the next load picks up a fresh export (after a retrain). */
 export function invalidate(zip?: string) {
   if (zip) zipCache.delete(zip)
   else zipCache.clear()
@@ -97,17 +94,45 @@ export function rentInfo(zip: string): RentInfo | null {
   return meta?.rentByZip[zip] ?? null
 }
 
-/** Live evidence for a ZIP: API first (always fresh), static export as fallback. */
-export async function loadEvidence(zip: string): Promise<Evidence | null> {
-  for (const url of [`${API_BASE}/evidence/${zip}`, `${DATA_BASE}/evidence/${zip}.json`]) {
-    try {
-      const r = await fetch(url)
-      if (r.ok) return (await r.json()) as Evidence
-    } catch {
-      /* try the next source */
-    }
+export type Narrative = {
+  report: {
+    headline: string
+    bottom_line: string
+    your_request: string
+    fit_for_you: string
+    sites: { name: string; verdict: string; best_for: string; why_here: string; money: string; watch_out: string }[]
+    comparison: string
+    chart_notes: { startup_cost: string; payback: string; monthly_money: string }
+    what_would_change_the_answer: string[]
+    risks: { risk: string; level: 'high' | 'medium' | 'low'; why_it_matters: string; what_to_do: string }[]
+    next_steps: string[]
+    questions_to_ask: string[]
+    chicago_checklist: string[]
+    how_to_read_the_numbers: string[]
+    data_and_limits: string[]
   }
-  return null
+  unverified_numbers: { where: string; number: string }[]
+  problems: string[] // structural checks still failing after the revision pass
+  revised: boolean
+  reference_facts: { topic: string; source: string; url: string | null }[]
+  model: string
+  generated_at: string
+  cached: boolean
+}
+
+/** Plain-English report written by the server's report writer (DeepSeek) from one analysis' model outputs. */
+export async function fetchNarrative(payload: object): Promise<Narrative> {
+  const r = await fetch(`${API_BASE}/report`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ payload }) })
+  if (!r.ok) {
+    let msg = `HTTP ${r.status}`
+    try {
+      msg = ((await r.json()) as { detail?: string }).detail ?? msg
+    } catch {
+      /* non-JSON error body */
+    }
+    throw new Error(msg)
+  }
+  return (await r.json()) as Narrative
 }
 
 export function percentile(sorted: number[], v: number) {

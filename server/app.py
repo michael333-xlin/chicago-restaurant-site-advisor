@@ -1,28 +1,30 @@
-"""OpeningTable web server: built frontend + block data + live-data / retraining API.
+"""OpeningTable web server: built frontend + block data + model API + plain-English report writer.
 
     uvicorn server.app:app --host 0.0.0.0 --port 8000
 
 Routes
   GET  /                       frontend (web/dist)
-  GET  /data/<file>            block data exported by advantage/export_web.py (meta, overview, blocks, evidence)
+  GET  /data/<file>            block data exported by advantage/export_web.py (meta, overview, blocks)
   GET  /api/health             liveness (always 200 once the process is up)
-  GET  /api/status             data/model state, background job, live record counts
-  GET  /api/evidence/<zip>     live records for a ZIP straight from data/live (always fresh)
+  GET  /api/status             data/model state, background job, whether the report writer is configured
   GET  /api/recommend          neighborhood ranking (advantage/recommend.py), read-only, writes nothing
   GET  /api/survival           1,000-day license survival + license curve for a ZIP, optional operator / address
                                inputs (survival.SiteSurvival), read-only
+  POST /api/report             plain-English report written by DeepSeek from one analysis' model outputs
+                               (advantage/narrative.py); every number is checked against those outputs
   GET  /api/tools              tool schemas for an LLM agent
-  POST /api/tools/<name>       run a tool (admin token, except recommend / live_status)
-  POST /api/live/fetch         Exa search for a ZIP -> stored -> web data re-exported   (admin token)
-  POST /api/live/ingest        store agent-extracted records -> web data re-exported  (admin token)
+  POST /api/tools/<name>       run a tool (admin token, except recommend / site_survival / model_status)
   POST /api/admin/retrain      download data, retrain, promote-or-rollback, export   (admin token)
   POST /api/admin/export       re-export web data only                                (admin token)
 
+All numbers come from the downloaded datasets and the trained models (no live web data).
 Admin calls need header  Authorization: Bearer $ADMIN_TOKEN . Without ADMIN_TOKEN set they are disabled.
+The report writer needs DEEPSEEK_API_KEY; without it /api/report returns 503.
 On first start (no exported data) the server bootstraps in the background unless AUTO_BOOTSTRAP=0.
-Everything that writes output/ (bootstrap, retrain, export, live fetch / ingest) holds the same lock; a second
-writer gets HTTP 409 and can retry when /api/status shows job.state = idle.
+Everything that writes output/ (bootstrap, retrain, export) holds the same lock; a second writer gets HTTP 409
+and can retry when /api/status shows job.state = idle.
 """
+import hashlib
 import hmac
 import json
 import os
@@ -30,7 +32,7 @@ import sys
 import threading
 import time
 import traceback
-from contextlib import asynccontextmanager, contextmanager
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import Body, FastAPI, Header, HTTPException, Query
@@ -42,13 +44,13 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "advantage"))
 
 from common import OUT, RAW  # noqa: E402
-from live import KINDS, LiveStore  # noqa: E402
 
 WEB_DATA = OUT / "web_data"
 WEB_DIST = ROOT / "web" / "dist"
 ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "")
-PUBLIC_TOOLS = {"recommend", "site_survival", "live_status"}
-WRITING_TOOLS = {"exa_fetch", "ingest_records"}   # re-export the web data: run under the job lock
+PUBLIC_TOOLS = {"recommend", "site_survival", "model_status"}
+REPORT_MAX_BYTES = 80_000        # one analysis' model outputs are ~10-20 KB
+REPORT_CACHE_SIZE = 200          # identical analyses reuse the written report instead of calling DeepSeek again
 
 # ------------------------------------------------------------------ jobs that write output/ (one at a time)
 # job.state: idle | running | error.  job.outcome of the last job: promoted | rolled_back | done | failed
@@ -90,23 +92,10 @@ def _run(name, fn):
     return {"started": name}
 
 
-@contextmanager
-def _exclusive(name):
-    """Synchronous request under the same lock (live fetch / ingest re-export the web data)."""
-    _begin(name)
-    try:
-        yield
-    except Exception as e:  # noqa: BLE001
-        _finish(error=e)
-        raise
-    else:
-        _finish()
-
-
 def _export():
     from export_web import build
     m = build()
-    return {"generatedAt": m["generatedAt"], "liveApplied": m["liveApplied"]}
+    return {"generatedAt": m["generatedAt"], "modelVersion": m["modelVersion"]}
 
 
 def _retrain(download):
@@ -160,43 +149,22 @@ def status():
     meta = {}
     if (WEB_DATA / "meta.json").exists():
         m = json.loads((WEB_DATA / "meta.json").read_text())
-        meta = {k: m.get(k) for k in ["generatedAt", "asOf", "snapshotId", "modelVersion", "liveApplied"]}
+        meta = {k: m.get(k) for k in ["generatedAt", "asOf", "snapshotId", "modelVersion"]}
     reg = json.loads((OUT / "model_registry.json").read_text()) if (OUT / "model_registry.json").exists() else []
     promoted = [r for r in reg if r.get("promoted")]
     return {"data_ready": bool(meta), "data": meta,
             "job": {k: JOB[k] for k in ["state", "job", "outcome", "started_at", "finished_at", "error"]},
-            "model": promoted[-1] if promoted else None, "live": LiveStore().summary(),
-            "exa_configured": bool(os.environ.get("EXA_API_KEY")), "admin_enabled": bool(ADMIN_TOKEN)}
-
-
-@app.get("/api/evidence/{zip5}")
-def evidence(zip5: str):
-    if not (zip5.isdigit() and len(zip5) == 5):
-        raise HTTPException(400, "zip5 must be 5 digits")
-    store, out = LiveStore(), {}
-    for kind in KINDS:
-        df = store.load(kind)
-        if df.empty or "zip5" not in df:
-            out[kind] = []
-            continue
-        sub = df[df.zip5 == zip5].drop(columns=[c for c in ["lat", "lon"] if c in df], errors="ignore")
-        out[kind] = json.loads(sub.to_json(orient="records", date_format="iso"))
-        for r in out[kind]:
-            for k, v in list(r.items()):
-                if isinstance(v, str) and k.endswith("_date"):
-                    r[k] = v[:10]
-    meta = json.loads((WEB_DATA / "meta.json").read_text()) if (WEB_DATA / "meta.json").exists() else {}
-    out["rent"] = meta.get("rentByZip", {}).get(zip5)
-    return out
+            "model": promoted[-1] if promoted else None,
+            "report_writer_configured": bool(os.environ.get("DEEPSEEK_API_KEY")), "admin_enabled": bool(ADMIN_TOKEN)}
 
 
 @app.get("/api/recommend")
 def recommend(budget: float = Query(...), cuisine: str = Query(...), space_type: str = "new",
-              traffic_shock: float = 1.0, food_shock: float = 1.0, use_live: bool = True,
+              traffic_shock: float = 1.0, food_shock: float = 1.0,
               prior_licenses: int | None = Query(None, ge=0), entity: bool | None = None):
     from agent_api import call_tool
     r = call_tool("recommend", {"budget": budget, "cuisine": cuisine, "space_type": space_type,
-                                "traffic_shock": traffic_shock, "food_shock": food_shock, "use_live": use_live,
+                                "traffic_shock": traffic_shock, "food_shock": food_shock,
                                 "prior_licenses": prior_licenses, "entity": entity})
     if "error" in r:
         raise HTTPException(400, r["error"])
@@ -217,6 +185,40 @@ def survival(zip5: str = Query(...), cuisine: str = Query(...), prior_licenses: 
     return JSONResponse(json.loads(json.dumps(r, default=float)))
 
 
+_report_cache = {}
+_report_cache_lock = threading.Lock()
+
+
+@app.post("/api/report")
+def report(body: dict = Body(...)):
+    """body: {"payload": {...}} built by the web app from one analysis (web/src/model/narrativePayload.ts).
+    DeepSeek only writes the text; numbers it uses that are not in the payload come back in unverified_numbers."""
+    payload = body.get("payload")
+    if not isinstance(payload, dict) or not payload:
+        raise HTTPException(400, "body must be {\"payload\": {...}}")
+    raw = json.dumps(payload, sort_keys=True)
+    if len(raw.encode()) > REPORT_MAX_BYTES:
+        raise HTTPException(413, f"payload larger than {REPORT_MAX_BYTES} bytes")
+    if not os.environ.get("DEEPSEEK_API_KEY"):
+        raise HTTPException(503, "report writer not configured: set DEEPSEEK_API_KEY on the server")
+    key = hashlib.sha256(raw.encode()).hexdigest()
+    with _report_cache_lock:
+        hit = _report_cache.get(key)
+    if hit:
+        return {**hit, "cached": True}
+    from narrative import NarrativeError, write_report
+    try:
+        r = write_report(payload)
+    except NarrativeError as e:
+        raise HTTPException(502, str(e))
+    r["generated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    with _report_cache_lock:
+        if len(_report_cache) >= REPORT_CACHE_SIZE:
+            _report_cache.pop(next(iter(_report_cache)))
+        _report_cache[key] = r
+    return {**r, "cached": False}
+
+
 @app.get("/api/tools")
 def tools():
     from agent_api import TOOLS
@@ -232,37 +234,8 @@ def run_tool(name: str, args: dict = Body(default={}), authorization: str | None
         _admin(authorization)
     if name == "retrain_models":
         return _run("retrain", lambda: _retrain(bool(args.get("download", True))))
-    if name in WRITING_TOOLS:
-        with _exclusive(name):
-            r = call_tool(name, args)
-    else:
-        r = call_tool(name, args)
+    r = call_tool(name, args)
     return JSONResponse(json.loads(json.dumps(r, default=str)))
-
-
-@app.post("/api/live/fetch")
-def live_fetch(body: dict = Body(...), authorization: str | None = Header(default=None)):
-    """body: {"zip5": "60607", "cuisine": "asian", "topics": [...optional], "area": "optional"}"""
-    _admin(authorization)
-    from agent_api import call_tool
-    with _exclusive("live_fetch"):
-        r = call_tool("exa_fetch", {**body, "export": True})
-    if "error" in r:
-        raise HTTPException(400, r["error"])
-    return JSONResponse(json.loads(json.dumps(r, default=str)))
-
-
-@app.post("/api/live/ingest")
-def live_ingest(body: dict = Body(...), authorization: str | None = Header(default=None)):
-    """body: {"kind": "places|rents|prices|signals", "records": [...], "extractor": "agent"}"""
-    _admin(authorization)
-    from agent_api import call_tool
-    with _exclusive("live_ingest"):
-        r = call_tool("ingest_records", {"kind": body.get("kind"), "records": body.get("records", []),
-                                         "extractor": body.get("extractor", "agent"), "export": True})
-    if "error" in r:
-        raise HTTPException(400, r["error"])
-    return r
 
 
 @app.post("/api/admin/retrain")

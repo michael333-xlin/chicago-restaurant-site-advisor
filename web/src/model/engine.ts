@@ -226,7 +226,7 @@ function risks(plan: Plan, b: Block, cuisine: Cuisine, inputs: Inputs, survival:
     text: `${Math.round(lp * 100)}% of simulations pay back before their license ends (each draw samples a license end from the survival model's curve for this ZIP; licenses run in 2-year terms, so closures show up at renewal)`,
   })
   if (b.rentKind === 'fallback')
-    out.push({ level: 'medium', text: `No rent data for ZIP ${b.zip} yet: rent is the citywide median of surveyed areas ($${b.rentPsf}/sq ft/yr). Fetch live listings before relying on payback.` })
+    out.push({ level: 'medium', text: `No rent data for ZIP ${b.zip} yet: rent is the citywide median of surveyed areas ($${b.rentPsf}/sq ft/yr). Get the asking rent of the actual space before relying on payback.` })
   if (cs.opened12m >= 2) out.push({ level: cs.opened12m >= 4 ? 'high' : 'medium', text: `${cs.opened12m} new ${name} openings within ~300 m in the last 12 months` })
   if (plan.noPaybackProb > 0.1) out.push({ level: plan.noPaybackProb > 0.3 ? 'high' : 'medium', text: `${Math.round(plan.noPaybackProb * 100)}% of simulations do not pay back within 5 years` })
   if (plan.flags.includes('over_budget')) out.push({ level: 'high', text: `Over budget: central startup cost $${Math.round(plan.startup.p50 / 1000)}k is above the $${Math.round(inputs.budgetMax / 1000)}k ceiling. Shown because no plan fits; simulated in full for comparison` })

@@ -1,21 +1,19 @@
 """Agent interface: tools an LLM agent (or a web backend) can call, plus the self-iteration loop.
 
-Two update speeds:
-  * live (seconds):  exa_fetch / ingest_records write to data/live/, recommend(use_live=True) overlays them.
-  * retrain (~3 min): re-download the official datasets, rerun step1-step4, and promote the new models
-                      only if they are not worse than the current ones (guardrail). Schedule it e.g. weekly.
+All numbers come from the downloaded datasets and the trained models; there is no live web data.
+  * retrain (~1 min + ~2 min download): re-download the official datasets, rerun step1-step4, and promote the new
+    models only if they are not worse than the current ones (guardrail). Scheduled weekly (.github/workflows).
 
 CLI
     python3 advantage/agent_api.py tools                                   # print tool schemas (JSON)
-    python3 advantage/agent_api.py fetch --area "West Loop" --zip5 60607 --cuisine asian
-    python3 advantage/agent_api.py ingest --kind rents --file my_rents.json
-    python3 advantage/agent_api.py recommend --budget 350000 --cuisine asian --live
+    python3 advantage/agent_api.py recommend --budget 350000 --cuisine asian
     python3 advantage/agent_api.py retrain [--no-download]
+    python3 advantage/agent_api.py export                                  # re-export the web block data
     python3 advantage/agent_api.py status
 
 Python / agent
     from agent_api import TOOLS, call_tool
-    call_tool("recommend", {"budget": 350000, "cuisine": "asian", "use_live": True})
+    call_tool("recommend", {"budget": 350000, "cuisine": "asian"})
 """
 import argparse
 import json
@@ -27,7 +25,6 @@ import threading
 from datetime import date, datetime, timezone
 
 from common import FIN_MAP, FINANCE_DIR, OUT, ROOT
-from live import KINDS, LIVE_DIR, SCHEMAS, LiveStore
 
 HERE = ROOT / "advantage"
 VERSIONS = OUT / "versions"
@@ -151,17 +148,15 @@ def retrain(download=True, force=False):
 
 
 # ------------------------------------------------------------------ tools
-# Engines are cached per (use_live, input files' mtimes, day): a public /api/recommend call re-reads nothing and
-# writes nothing. A retrain, an export or new live records change the mtimes, so the next call rebuilds.
+# Engines are cached per (input files' mtimes, day): a public /api/recommend call re-reads nothing and writes
+# nothing. A retrain or an export changes the mtimes, so the next call rebuilds.
 _CACHE, _CACHE_LOCK = {}, threading.Lock()
 _ENGINE_FILES = ["competitive_advantage_by_zip_cuisine.csv", "survival_training_table.parquet", "zip_panel.csv",
                  "survival_model.pkl", "survival_points.parquet", "survival_defaults.json"]
 
 
-def _stamp(use_live):
+def _stamp():
     files = [OUT / f for f in _ENGINE_FILES] + [FINANCE_DIR / "cuisine_params.json", FINANCE_DIR / "rent_by_area.json"]
-    if use_live:
-        files += [LIVE_DIR / f"{k}.jsonl" for k in KINDS]
     return tuple(f.stat().st_mtime_ns if f.exists() else 0 for f in files) + (date.today().isoformat(),)
 
 
@@ -175,26 +170,25 @@ def _cached(kind, key, build):
         return obj
 
 
-def _engine(use_live):
+def _engine():
     from recommend import Engine
-    return _cached(f"engine_{bool(use_live)}", _stamp(use_live), lambda: Engine(live=LiveStore() if use_live else None))
+    return _cached("engine", _stamp(), Engine)
 
 
 def site_survival():
     from survival import SiteSurvival
-    return _cached("site_survival", _stamp(False), SiteSurvival)
+    return _cached("site_survival", _stamp(), SiteSurvival)
 
 
-def tool_recommend(budget, cuisine, space_type="new", traffic_shock=1.0, food_shock=1.0, use_live=True,
-                   top_n=5, full=False, prior_licenses=None, entity=None):
-    eng = _engine(use_live)
-    res = eng.recommend(budget, cuisine, space_type, traffic_shock, food_shock, top_n,
-                        prior_licenses=prior_licenses, entity=entity)
+def tool_recommend(budget, cuisine, space_type="new", traffic_shock=1.0, food_shock=1.0, top_n=5, full=False,
+                   prior_licenses=None, entity=None):
+    res = _engine().recommend(budget, cuisine, space_type, traffic_shock, food_shock, top_n,
+                              prior_licenses=prior_licenses, entity=entity)
     if full:
         return res
     # compact view for an LLM context window
-    keep = ["area", "score", "boundary", "subscores", "reasons", "competition", "license_survival_1000d",
-            "demographics", "stress_test", "risk", "space_comparison", "live"]
+    keep = ["area", "score", "subscores", "reasons", "competition", "license_survival_1000d",
+            "demographics", "stress_test", "risk", "space_comparison"]
     top = []
     for x in res["top"]:
         y = {k: x[k] for k in keep if k in x}
@@ -203,41 +197,22 @@ def tool_recommend(budget, cuisine, space_type="new", traffic_shock=1.0, food_sh
                         "payback_months": {k: v["payback_months"] for k, v in f["scenarios"].items()},
                         "rent_psf_year": f["rent_psf_year"], "rent_source": f["rent_source"]}
         top.append(y)
-    return {**{k: res[k] for k in ["inputs", "all_ranked", "excluded", "live_data", "method", "sources"]}, "top": top}
+    return {**{k: res[k] for k in ["inputs", "all_ranked", "excluded", "method", "sources"]}, "top": top}
 
 
 def refresh_web():
-    """Re-export the web block data so new live records show up in the app (~10 s)."""
+    """Re-export the web block data from the current models (~1 min)."""
     from export_web import build
     m = build()
-    return {"generatedAt": m["generatedAt"], "liveApplied": m["liveApplied"]}
-
-
-def tool_exa_fetch(cuisine, area=None, zip5=None, topics=None, num_results=8, days_back=180, export=True):
-    from exa_fetch import TOPICS, area_for_zip, fetch_area
-    if not area and not zip5:
-        raise ValueError("give zip5 or area")
-    area = area or area_for_zip(zip5)
-    out = fetch_area(area, cuisine, zip5=zip5, topics=tuple(topics or TOPICS), num_results=num_results,
-                     days_back=days_back)
-    if export:
-        out["web_export"] = refresh_web()
-    return out
-
-
-def tool_ingest_records(kind, records, extractor="agent", export=True):
-    rep = LiveStore().ingest(kind, records, extractor=extractor)
-    if export and rep["accepted"]:
-        rep["web_export"] = refresh_web()
-    return rep
+    return {"generatedAt": m["generatedAt"], "modelVersion": m["modelVersion"]}
 
 
 def tool_site_survival(zip5, cuisine, prior_licenses=None, entity=None, address=None):
     return site_survival().score(str(zip5), cuisine, prior_licenses=prior_licenses, entity=entity, address=address)
 
 
-def tool_live_status():
-    return {"live": LiveStore().summary(), "model": current_version()}
+def tool_model_status():
+    return {"model": current_version()}
 
 
 def tool_retrain(download=True):
@@ -246,31 +221,18 @@ def tool_retrain(download=True):
     return r
 
 
-def _schema_props(kind):
-    props = {}
-    for f, spec in SCHEMAS[kind].items():
-        if f.startswith("_"):
-            continue
-        typ = spec[0]
-        props[f] = {"type": "number" if typ is float else "string"}
-        if typ == "date":
-            props[f]["description"] = "YYYY-MM-DD"
-    return props
-
-
 TOOLS = [
     {"name": "recommend",
      "description": "Rank Chicago neighborhoods for opening a restaurant. Areas that do not fit the budget are "
                     "excluded; the rest are ranked by supply gap, base-case payback and profit when traffic drops 30%. "
-                    "Also returns store size, monthly P&L, warnings, competition, demographics, live evidence and a "
-                    "separate 1,000-day license survival estimate (not part of the score). All numbers carry sources.",
+                    "Also returns store size, monthly P&L, warnings, competition, demographics and a separate "
+                    "1,000-day license survival estimate (not part of the score). All numbers carry sources.",
      "input_schema": {"type": "object", "properties": {
          "budget": {"type": "number", "description": "total budget in USD"},
          "cuisine": {"type": "string", "enum": list(FIN_MAP)},
          "space_type": {"type": "string", "enum": ["new", "second_gen"], "description": "new build-out or take over an existing restaurant space"},
          "traffic_shock": {"type": "number", "description": "1.0 = normal, 0.7 = 30% fewer customers"},
          "food_shock": {"type": "number", "description": "1.0 = normal, 1.15 = food costs +15%"},
-         "use_live": {"type": "boolean", "description": "overlay live records ingested from the web"},
          "top_n": {"type": "integer"},
          "prior_licenses": {"type": "integer", "description": "optional: Chicago food licenses the operator held before "
                                                               "(re-scores the survival estimate; omitted = ZIP average)"},
@@ -286,36 +248,15 @@ TOOLS = [
          "entity": {"type": "boolean", "description": "registered as a company (LLC/Inc/Corp)"},
          "address": {"type": "string", "description": "street address of the site, e.g. '2121 N Clark St'"}},
          "required": ["zip5", "cuisine"]}},
-    {"name": "exa_fetch",
-     "description": "Search the web with Exa for fresh info about one area (rents, openings, closures, menu prices, "
-                    "developments). Rents and news signals are auto-extracted and stored; returns page texts so you "
-                    "can extract openings/closures/prices yourself and send them to ingest_records.",
-     "input_schema": {"type": "object", "properties": {
-         "zip5": {"type": "string", "description": "Chicago ZIP to research, e.g. '60607' (the area name is derived from it)"},
-         "area": {"type": "string", "description": "optional neighborhood name, e.g. 'West Loop'"},
-         "cuisine": {"type": "string", "enum": list(FIN_MAP)},
-         "topics": {"type": "array", "items": {"type": "string", "enum": ["rents", "openings", "closures", "prices", "development"]}},
-         "num_results": {"type": "integer"}, "days_back": {"type": "integer"}},
-         "required": ["zip5", "cuisine"]}},
-    {"name": "ingest_records",
-     "description": "Store structured facts you extracted from web pages. Every record needs source_url. "
-                    "Kinds: places (restaurant opened/closed), rents (asking $/sqft/year), prices (avg ticket or "
-                    "entree USD), signals (news). Returns accepted / duplicates / rejected-with-reasons.",
-     "input_schema": {"type": "object", "properties": {
-         "kind": {"type": "string", "enum": list(KINDS)},
-         "records": {"type": "array", "items": {"type": "object"},
-                     "description": "fields per kind: " + json.dumps({k: list(_schema_props(k)) for k in KINDS})},
-         "extractor": {"type": "string", "enum": ["agent", "manual"]}},
-         "required": ["kind", "records"]}},
-    {"name": "live_status", "description": "Counts of stored live records and the current model version + metrics.",
+    {"name": "model_status", "description": "The current promoted model version and its validation metrics.",
      "input_schema": {"type": "object", "properties": {}}},
     {"name": "retrain_models",
      "description": "Re-download official city/federal data, retrain all models, promote only if metrics do not "
                     "degrade. Takes a few minutes.",
      "input_schema": {"type": "object", "properties": {"download": {"type": "boolean"}}}},
 ]
-_DISPATCH = {"recommend": tool_recommend, "site_survival": tool_site_survival, "exa_fetch": tool_exa_fetch,
-             "ingest_records": tool_ingest_records, "live_status": tool_live_status, "retrain_models": tool_retrain}
+_DISPATCH = {"recommend": tool_recommend, "site_survival": tool_site_survival, "model_status": tool_model_status,
+             "retrain_models": tool_retrain}
 
 
 def call_tool(name, args):
@@ -331,38 +272,22 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("tools")
     sub.add_parser("status")
-    sub.add_parser("export", help="re-export web block data (applies live records)")
-    f = sub.add_parser("fetch")
-    f.add_argument("--zip5", required=False)
-    f.add_argument("--area", help="optional; derived from --zip5")
-    f.add_argument("--cuisine", required=True, choices=list(FIN_MAP))
-    f.add_argument("--topics", nargs="*")
-    i = sub.add_parser("ingest")
-    i.add_argument("--kind", required=True, choices=list(KINDS))
-    i.add_argument("--file", required=True, help="JSON list of records")
-    i.add_argument("--extractor", default="manual")
+    sub.add_parser("export", help="re-export the web block data")
     r = sub.add_parser("recommend")
     r.add_argument("--budget", type=float, required=True)
     r.add_argument("--cuisine", required=True, choices=list(FIN_MAP))
     r.add_argument("--space", default="new")
-    r.add_argument("--live", action="store_true")
     t = sub.add_parser("retrain")
     t.add_argument("--no-download", action="store_true")
     a = ap.parse_args()
     if a.cmd == "tools":
         out = TOOLS
     elif a.cmd == "status":
-        out = call_tool("live_status", {})
+        out = call_tool("model_status", {})
     elif a.cmd == "export":
         out = refresh_web()
-    elif a.cmd == "fetch":
-        out = call_tool("exa_fetch", {"area": a.area, "cuisine": a.cuisine, "zip5": a.zip5, "topics": a.topics})
-    elif a.cmd == "ingest":
-        out = call_tool("ingest_records", {"kind": a.kind, "records": json.loads(open(a.file).read()),
-                                           "extractor": a.extractor})
     elif a.cmd == "recommend":
-        out = call_tool("recommend", {"budget": a.budget, "cuisine": a.cuisine, "space_type": a.space,
-                                      "use_live": a.live})
+        out = call_tool("recommend", {"budget": a.budget, "cuisine": a.cuisine, "space_type": a.space})
     else:
         out = call_tool("retrain_models", {"download": not a.no_download})
     print(json.dumps(out, indent=2, default=str))

@@ -4,10 +4,9 @@ Writes to output/web_data/ (served at /data/ by server/app.py):
   meta.json            sources, snapshot id, model version, rent per ZIP, gap reliability per cuisine
   overview.json        one H3 res-8 cell per ~0.7 km2 for the city map: [{h3, zip, block}]
   blocks/<zip>.json    every H3 res-10 cell inside the ZIP: [Block, ...]   (web/src/types.ts Block)
-  evidence/<zip>.json  live records (rents, prices, places, signals) with source links
 
 Every block value is summed over the cell and its two surrounding rings (~300 m), like the frontend expects.
-Live records in data/live/ are applied on every export (rents -> ZIP rent, opened/closed places -> counts).
+Only the downloaded datasets, the Overture snapshot and the finance survey are used (no live web data).
 
     python3 advantage/export_web.py              # full export (~1 min)
     python3 advantage/export_web.py --zips 60614 60647
@@ -24,7 +23,6 @@ import pandas as pd
 from common import CUISINES, FIN_MAP, NON_REST, NOW, OUT, RAW, ROOT, addr_norm, load_overture, norm_name  # noqa: F401
 from features import DATA_LAG, load_zip_panel, zip_year
 from gapmodel import GAP_FEATS, loo_expected
-from live import LiveStore
 
 WEB = ["italian", "steakhouse", "fast_food", "asian"]          # web/src/types.ts Cuisine
 GROUP_TO_WEB = {g: c for c in WEB for g in ({"italian": ["italian", "pizza"]}.get(c) or FIN_MAP[c])}
@@ -73,28 +71,12 @@ class RingSum:
         return dict(zip(self.cols, s))
 
 
-def load_sources(live):
+def load_sources():
     ov = load_overture()
     ov = ov[ov.lat.notna()].copy()
     ov["web"] = ov.cuisine.map(GROUP_TO_WEB)
     ov["name_norm"] = ov.restaurant_name.map(norm_name)
-    applied = {"opened": 0, "closed": 0, "skipped": 0}
-    pl = live.load("places")
-    for _, r in pl.sort_values("event_date").iterrows() if not pl.empty else []:
-        m = ov[(ov.name_norm == norm_name(r["name"])) & (ov.zip5 == r.get("zip5"))]
-        if r["status"] == "open" and m.empty:
-            ov = pd.concat([ov, pd.DataFrame([{"restaurant_name": r["name"], "name_norm": norm_name(r["name"]),
-                                               "zip5": r.get("zip5"), "lat": r["lat"], "lon": r["lon"],
-                                               "cuisine": r.get("cuisine"),
-                                               "web": GROUP_TO_WEB.get(r.get("cuisine"), r.get("cuisine") if r.get("cuisine") in WEB else None)}])],
-                           ignore_index=True)
-            applied["opened"] += 1
-        elif r["status"] == "closed" and not m.empty:
-            ov = ov.drop(m.index[:1])
-            applied["closed"] += 1
-        else:
-            applied["skipped"] += 1
-    return ov, applied
+    return ov
 
 
 def dry_precincts():
@@ -139,13 +121,12 @@ def license_points():
 
 
 def build(zips_only=None):
-    live = LiveStore()
     zips = json.loads(ZIPS_JSON.read_text())
     zips = [z for z in zips if not zips_only or z["zip"] in zips_only] if zips_only else zips
     panel = load_zip_panel()
     zctx = zip_year(panel, NOW.year - DATA_LAG)
 
-    ov, applied = load_sources(live)
+    ov = load_sources()
     lic = license_points()
 
     # ---- restaurants (Overture) per cell
@@ -239,29 +220,17 @@ def build(zips_only=None):
                   for (z5, c), g in cai.dropna(subset=["web"]).groupby(["zip5", "web"])}
 
     rents_area = json.loads((ROOT / "finance" / "rent_by_area.json").read_text())
-    from live import MIN_RENT_N, RENT_MIN_CONFIDENCE
-    live_all = live.load("rents")
-    live_r = live.load("rents", min_confidence=RENT_MIN_CONFIDENCE)   # pattern-extracted rents: evidence only
     fallback = float(np.median([v["rent_psf_year"] for v in rents_area.values()]))
     rent_by_zip = {}
     for z5 in chi_zips:
-        lr = live_r[live_r.zip5 == z5] if not live_r.empty and "zip5" in live_r else pd.DataFrame()
-        n_ev = int((live_all.zip5 == z5).sum()) if not live_all.empty and "zip5" in live_all else 0
         areas = [(k, v) for k, v in rents_area.items() if z5 in v.get("zip_codes", [])]
-        if len(lr) >= MIN_RENT_N:
-            rent_by_zip[z5] = {"psf": round(float(lr.rent_psf_year.median()), 1), "kind": "live", "n": int(len(lr)),
-                               "source": f"Live asking rents ({len(lr)} observations, latest {lr.observed_date.max():%Y-%m-%d})",
-                               "urls": lr.source_url.tolist()[:8]}
-        elif areas:
+        if areas:
             rent_by_zip[z5] = {"psf": round(float(np.median([v["rent_psf_year"] for _, v in areas])), 1), "kind": "survey",
                                "source": "finance/rent_by_area.json: " + "; ".join(f"{k}: {v['source']}" for k, v in areas),
                                "urls": []}
         else:
             rent_by_zip[z5] = {"psf": round(fallback, 1), "kind": "fallback", "urls": [],
-                               "source": f"No local listing yet: citywide median of the {len(rents_area)} surveyed areas"}
-        if n_ev and rent_by_zip[z5]["kind"] != "live":
-            rent_by_zip[z5]["source"] += (f" ({n_ev} live rent observation(s) shown as evidence only: replacing the rent "
-                                          f"needs {MIN_RENT_N}+ agent/manual records)")
+                               "source": f"No surveyed area covers this ZIP: citywide median of the {len(rents_area)} surveyed areas"}
 
     def block(c, z5):
         lat, lon = h3.cell_to_latlng(c)
@@ -299,7 +268,6 @@ def build(zips_only=None):
     # ---- assemble
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "blocks").mkdir(exist_ok=True)
-    (OUT_DIR / "evidence").mkdir(exist_ok=True)
     all_zips = json.loads(ZIPS_JSON.read_text())
     overview = []
     for z in all_zips:
@@ -325,20 +293,6 @@ def build(zips_only=None):
         blocks = [finish(block(c, z["zip"])) for c in cells]
         _write(OUT_DIR / "blocks" / f"{z['zip']}.json", json.dumps(blocks, separators=(",", ":")))
         stats[z["zip"]] = {"cells": len(blocks), "eligible": sum(b["eligible"] for b in blocks)}
-        ev = {}
-        for kind in ("rents", "prices", "places", "signals"):
-            df = live.load(kind)
-            if df.empty or "zip5" not in df:
-                ev[kind] = []
-                continue
-            sub = df[df.zip5 == z["zip"]].copy()
-            for col in sub.columns:
-                if pd.api.types.is_datetime64_any_dtype(sub[col]):
-                    sub[col] = sub[col].dt.strftime("%Y-%m-%d")
-            ev[kind] = json.loads(sub.drop(columns=[c for c in ["lat", "lon"] if c in sub], errors="ignore")
-                                  .to_json(orient="records"))
-        ev["rent"] = rent_by_zip.get(z["zip"])
-        _write(OUT_DIR / "evidence" / f"{z['zip']}.json", json.dumps(ev, separators=(",", ":"), default=str))
 
     import pickle
     bundle = pickle.load(open(OUT / "survival_model.pkl", "rb"))
@@ -354,7 +308,6 @@ def build(zips_only=None):
         "notice": f"Real data · snapshot {NOW:%Y-%m-%d}",
         "gapReliability": {c: round(float(corr[c]), 3) for c in WEB},
         "rentByZip": rent_by_zip,
-        "liveApplied": applied, "liveCounts": live.summary(),
         "ctaWindow": cta_window,
         "licenseCurve": {"S": [round(float(v), 4) for v in bundle["license_curve"]["S_city"]],
                          "S1000d": round(float(bundle["license_curve"]["S_city_1000d"]), 4),
@@ -374,7 +327,7 @@ def build(zips_only=None):
             "income": "Share of employed residents earning > $3,333/month (LODES RAC CE03); percentile vs city",
             "age": "ZIP share aged 18-39 (Chicago Population Counts)",
             "transit": f"CTA 'L' average weekday entries {cta_window[0]} to {cta_window[1]} (5neh-572f) within 400 m",
-            "rent": "Live listings via Exa (3+ agent/manual records) > finance/rent_by_area.json survey > citywide median fallback",
+            "rent": "finance/rent_by_area.json team survey of 7 neighborhoods; other ZIPs: median of those 7 (flagged)",
             "liquor": "Dry precincts: City of Chicago Liquor Moratorium Districts - Dry Precincts (y49e-jumb), a historical "
                       "2011 dataset; precinct boundaries may have changed since, confirm with BACP",
             "survival": "1,000-day license survival model (step2, rolling out-of-time validated) for a new independent "
@@ -392,6 +345,6 @@ if __name__ == "__main__":
     ap.add_argument("--zips", nargs="*")
     a = ap.parse_args()
     m = build(set(a.zips) if a.zips else None)
-    print(json.dumps({k: m[k] for k in ["generatedAt", "snapshotId", "modelVersion", "gapReliability", "liveApplied"]}, indent=1))
+    print(json.dumps({k: m[k] for k in ["generatedAt", "snapshotId", "modelVersion", "gapReliability"]}, indent=1))
     print("zips:", len(m["zips"]), "cells:", sum(v["cells"] for v in m["zips"].values()),
           "eligible:", sum(v["eligible"] for v in m["zips"].values()))
