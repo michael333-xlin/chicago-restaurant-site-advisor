@@ -7,12 +7,15 @@ import {
 } from '../../types'
 import { monthsNum, num, usd } from '../../format'
 import { CountUp, Reveal } from '../../ui'
+import ErrorBoundary from '../ErrorBoundary'
+import AdvisorReport from './AdvisorReport'
 import Assumptions from './Assumptions'
 import SiteDeepDive, { Flags } from './SiteDeepDive'
 
 export type Focus = 'summary' | 'site' | 'compare' | 'zip'
 
 const SECTIONS: { id: string; label: string; focus: Focus }[] = [
+  { id: 'plain', label: 'Plain-English report', focus: 'summary' },
   { id: 'summary', label: 'Summary', focus: 'summary' },
   { id: 'sites', label: 'Site deep-dive', focus: 'site' },
   { id: 'compare', label: 'Same-budget comparison', focus: 'compare' },
@@ -52,7 +55,7 @@ function PaybackRange({ p, horizon }: { p: R['top'][number]['payback']; horizon:
 
 export default function Report({ report, assumptions, onAssumptions, dirty, onRecalc, site, onSite, onFocus, onEdit }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [active, setActive] = useState('summary')
+  const [active, setActive] = useState('plain')
   const { inputs, top } = report
 
   useEffect(() => {
@@ -109,6 +112,15 @@ export default function Report({ report, assumptions, onAssumptions, dirty, onRe
           <span className="chip on">{RISK_LABEL[inputs.risk]}</span>
         </div>
       </header>
+
+      <section id="sec-plain" className="section">
+        <div className="sec-title"><span>00</span><h2>Plain-English report</h2></div>
+        <Reveal className="card wide">
+          <ErrorBoundary key={report.generatedAt} label="The plain-English report">
+            <AdvisorReport report={report} assumptions={assumptions} />
+          </ErrorBoundary>
+        </Reveal>
+      </section>
 
       <section id="sec-summary" className="section">
         <div className="sec-title"><span>01</span><h2>Summary</h2></div>
@@ -232,14 +244,14 @@ export default function Report({ report, assumptions, onAssumptions, dirty, onRe
           <p>
             Expected restaurants per block = restaurants within ~300 m × the cuisine share that ZIPs with similar population, jobs, income and age mix
             support (leave-one-ZIP-out Poisson model). Gap-model fit for this cuisine: correlation {(dataMeta()?.gapReliability[inputs.cuisine] ?? 0).toFixed(2)}
-            {(dataMeta()?.gapReliability[inputs.cuisine] ?? 1) < 0.4 ? ' — weak, treat the demand gap as indicative only' : ''}. Rent is ZIP level: live listings when fetched,
-            otherwise the team survey, otherwise the citywide median (flagged in the risks). Data snapshot {dataMeta()?.snapshotId ?? '—'}, exported {dataMeta()?.generatedAt ?? '—'}.
+            {(dataMeta()?.gapReliability[inputs.cuisine] ?? 1) < 0.4 ? ' — weak, treat the demand gap as indicative only' : ''}. Rent is ZIP level: the team survey of 7 neighborhoods,
+            otherwise the median of those surveys (flagged in the risks). Data snapshot {dataMeta()?.snapshotId ?? '—'}, exported {dataMeta()?.generatedAt ?? '—'}.
           </p>
           <p>
             Revenue is the weakest link: there is no POS data and no consultant project history, so revenue is a public-benchmark estimate and every revenue and payback figure is{' '}
             <b>not calibrated to local operating data</b>. Every benchmark in the assumptions table shows its source and status (sourced, partly sourced with the derivation, or no public source); hover a source for the derivation. The demand model's ability to predict
-            where restaurants exist is not the same as predicting which restaurant makes money. Live listings, competitor openings and menu prices come from Exa web search once they have been fetched for a ZIP;
-            every web claim links to its source (see Evidence in each site card). Equipment condition, key money and license transfer for second-gen spaces need a site visit and negotiation.
+            where restaurants exist is not the same as predicting which restaurant makes money. The plain-English report at the top is written by a language model
+            (DeepSeek) from these model results only; every number in it is checked against them. Equipment condition, key money and license transfer for second-gen spaces need a site visit and negotiation.
           </p>
           <p className="disclaimer">Payback periods are scenarios under stated assumptions, not promises. This draft must be reviewed by a consultant before it is shared with a client.</p>
         </Reveal>

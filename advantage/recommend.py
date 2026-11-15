@@ -6,14 +6,11 @@ Every number in the output carries a `sources` entry. Needs step1-step3 outputs 
     python3 advantage/recommend.py --budget 350000 --cuisine asian
     python3 advantage/recommend.py --budget 250000 --cuisine fast_food --traffic 0.7 --food 1.15 --space second_gen
 
-From Python (e.g. a web backend or the AI-advisor agent):
+From Python (e.g. a web backend or the report writer):
     from recommend import Engine
-    result = Engine().recommend(350_000, "asian")                 # base data only
-    result = Engine(live=LiveStore()).recommend(350_000, "asian")  # + live records from data/live/
+    result = Engine().recommend(350_000, "asian")
 
-Live overlay (see live.py): opened/closed places change supply counts and competition before scoring,
-live rents override the finance rent (a rent for an unknown area/ZIP adds that ZIP as a new candidate area),
->= MIN_PRICE_N live prices replace the estimated ticket, and recent signals are attached for the AI report.
+Uses only the downloaded datasets, the model outputs in output/ and the finance survey (no live web data).
 """
 import argparse
 import json
@@ -33,8 +30,6 @@ from finance import calc, load  # noqa: E402
 HIST_YEARS = range(2018, 2023)   # "last 5 years" of openings whose 3-year outcome is already observed
 MIN_HIST_N = 20                   # below this, the neighborhood history falls back to its ZIPs
 MIN_HIST_N_ZIP = 10               # below this, fall back to the citywide rate
-MIN_PRICE_N = 3                   # live price observations needed before replacing the estimated ticket
-LIVE_MAX_AGE_DAYS = 365
 STRESS_TRAFFIC = 0.7              # stress scenario used in the ranking: 30% fewer customers
 
 SOURCES = {
@@ -67,7 +62,7 @@ def _wavg(v, w):
 
 
 class Engine:
-    def __init__(self, live=None, live_max_age_days=LIVE_MAX_AGE_DAYS, min_confidence=0.0):
+    def __init__(self):
         self.params, self.rents = load("cuisine_params.json"), load("rent_by_area.json")
         geo = json.loads((FINANCE_DIR / "neighborhoods.geojson").read_text())
         self.polys = {f["properties"]["name"]: np.array(f["geometry"]["coordinates"][0]) for f in geo["features"]}
@@ -83,123 +78,6 @@ class Engine:
         tot = self.cai.groupby("zip5").actual.sum().sum()
         for fc, groups in FIN_MAP.items():
             self.city_share[fc] = self.cai[self.cai.cuisine.isin(groups)].actual.sum() / tot
-        self.area_boundary = {a: "neighborhood" for a in self.rents}
-        self.live, self.live_report = live, {"used": False}
-        self.live_prices = self.live_signals = pd.DataFrame()
-        if live is not None:
-            self._apply_live(live, live_max_age_days, min_confidence)
-
-    # ---------------------------------------------------------------- live overlay
-    def _apply_live(self, live, max_age, min_conf):
-        rep = {"used": True, "max_age_days": max_age, "store": live.summary()}
-        # 1) places: unmatched openings add supply, closures that match an Overture place remove it
-        pl = live.load("places", max_age, min_conf)
-        delta, opened, closed, skipped = {}, 0, 0, 0
-        if not pl.empty:
-            self.ov["name_norm"] = self.ov.restaurant_name.map(norm_name)
-            for _, r in pl.sort_values("event_date").iterrows():
-                nn, zz = norm_name(r["name"]), r.get("zip5")
-                match = self.ov[(self.ov.name_norm == nn) & (self.ov.zip5 == zz)]
-                c = r.get("cuisine") if r.get("cuisine") in CUISINES else None
-                if r["status"] == "open":
-                    if len(match):
-                        skipped += 1          # already in the snapshot
-                        continue
-                    self.ov = pd.concat([self.ov, pd.DataFrame([{
-                        "restaurant_name": r["name"], "name_norm": nn, "zip5": zz, "lat": r["lat"],
-                        "lon": r["lon"], "cuisine": c, "live_id": r["id"]}])], ignore_index=True)
-                    opened += 1
-                    sign = 1
-                else:
-                    if not len(match):
-                        skipped += 1          # cannot confirm it was counted
-                        continue
-                    self.ov = self.ov.drop(match.index[:1])
-                    closed += 1
-                    sign = -1
-                    c = c or match.iloc[0].cuisine
-                if c:
-                    delta[(zz, c)] = delta.get((zz, c), 0) + sign
-        if delta:
-            self.cai["actual_base"] = self.cai.actual
-            for (zz, c), d in delta.items():
-                m = (self.cai.zip5 == zz) & (self.cai.cuisine == c)
-                self.cai.loc[m, "actual"] = (self.cai.loc[m, "actual"] + d).clip(lower=0)
-            self.cai = score_cai(self.cai)
-        rep["places"] = {"opened_applied": opened, "closed_applied": closed, "skipped": skipped,
-                         "zip_cuisine_cells_changed": len(delta)}
-
-        # 2) rents: override known areas; a rent for an unknown area/ZIP creates a ZIP-boundary area
-        from live import MIN_RENT_N, RENT_MIN_CONFIDENCE
-        rn = live.load("rents", max_age, max(min_conf, RENT_MIN_CONFIDENCE))
-        rep["rents"] = {"rule": f"agent/manual rents only (confidence >= {RENT_MIN_CONFIDENCE}), at least {MIN_RENT_N} per "
-                                f"area; pattern-extracted rents are evidence only"}
-        if not rn.empty:
-            from live import zipgeo
-            lower = {k.lower(): k for k in self.rents}
-            rn["area_key"] = [lower.get(str(a).lower()) if isinstance(a, str) else None for a in rn.get("area", [None] * len(rn))]
-            for i, r in rn.iterrows():
-                if r.area_key is None and isinstance(r.get("zip5"), str):
-                    known = [k for k, v in self.rents.items() if v.get("primary_zip") == r.zip5]
-                    rn.at[i, "area_key"] = known[0] if known else (r.get("area") if isinstance(r.get("area"), str) else f"ZIP {r.zip5}")
-            for key, g in rn.dropna(subset=["area_key"]).groupby("area_key"):
-                if len(g) < MIN_RENT_N:
-                    rep["rents"][key] = {"n": len(g), "used": False, "reason": f"fewer than {MIN_RENT_N} observations"}
-                    continue
-                med, urls = float(g.rent_psf_year.median()), g.source_url.tolist()
-                src = f"live: median of {len(g)} asking-rent observations, latest {g.observed_date.max():%Y-%m-%d}: " + ", ".join(urls[:5])
-                if key not in self.rents:
-                    zz = g.zip5.dropna().iloc[0]
-                    ring = zipgeo().largest_ring(zz)
-                    self.polys[key] = ring
-                    self.rents[key] = {"rent_psf_year": med, "income_index": 1.0, "demand_index": 1.0, "source": src,
-                                       "lat": float(ring[:, 1].mean()), "lng": float(ring[:, 0].mean()),
-                                       "zip_codes": [zz], "primary_zip": zz, "community_area": None}
-                    self.area_boundary[key] = "zip"
-                    rep["rents"][key] = {"rent_psf_year": med, "n": len(g), "new_area": True}
-                else:
-                    rep["rents"][key] = {"rent_psf_year": med, "n": len(g), "new_area": False,
-                                         "replaced": self.rents[key]["rent_psf_year"]}
-                    self.rents[key] = {**self.rents[key], "rent_psf_year": med, "source": src}
-        # 3) prices and 4) signals are matched per area at recommend time
-        self.live_prices = live.load("prices", max_age, min_conf)
-        self.live_signals = live.load("signals", max_age, min_conf)
-        rep["prices_available"], rep["signals_available"] = len(self.live_prices), len(self.live_signals)
-        self.live_report = rep
-
-    def _area_mask(self, df, area, zips):
-        if df.empty:
-            return np.zeros(0, bool)
-        m = np.zeros(len(df), bool)
-        if "area" in df:
-            m |= df["area"].astype(str).str.lower().eq(area.lower()).values
-        if "zip5" in df:
-            m |= df["zip5"].isin(list(zips)).values
-        if {"lat", "lon"} <= set(df.columns):
-            ll = df[["lat", "lon"]].notna().all(axis=1).values
-            if ll.any():
-                m[ll] |= self._inside(area, df.lat.values[ll], df.lon.values[ll])
-        return m
-
-    def _prices_for(self, area, cuisine, zips):
-        p = self.live_prices
-        if p.empty:
-            return None
-        ok = p.cuisine.isin(FIN_MAP[cuisine] + [cuisine]).values if "cuisine" in p else np.zeros(len(p), bool)
-        sub = p[self._area_mask(p, area, zips) & ok]
-        if sub.empty:
-            return None
-        return {"n": int(len(sub)), "median_ticket_usd": round(float(sub.avg_ticket_usd.median()), 2),
-                "used_as_ticket": len(sub) >= MIN_PRICE_N, "sources": sub.source_url.tolist()[:10]}
-
-    def _signals_for(self, area, zips, k=5):
-        sg = self.live_signals
-        if sg.empty:
-            return []
-        sub = sg[self._area_mask(sg, area, zips)].sort_values("published_date", ascending=False).head(k)
-        cols = [c for c in ["published_date", "kind", "title", "summary", "sentiment", "source_url"] if c in sub]
-        return [{k2: (str(v)[:10] if k2 == "published_date" else v) for k2, v in r.items() if pd.notna(v)}
-                for r in sub[cols].to_dict("records")]
 
     # ---------------------------------------------------------------- per-neighborhood facts
     def _inside(self, area, lat, lon):
@@ -283,9 +161,7 @@ class Engine:
             rents = {k: dict(v) for k, v in self.rents.items()}
             rents[area]["demand_index"] = float(np.clip(np.sqrt((nb["expected"] + 1) / (nb["actual"] + 1)), 0.8, 1.2))
             rents[area]["income_index"] = nb["demographics"]["income_vs_city"]
-            prices = self._prices_for(area, cuisine, nb["zip_weights"].keys())
-            ticket = round(prices["median_ticket_usd"]) if prices and prices["used_as_ticket"] else None
-            kw = dict(space_type=space_type, food_shock=food_shock, ticket_override=ticket)
+            kw = dict(space_type=space_type, food_shock=food_shock)
             r = calc(budget, cuisine, area, self.params, rents, traffic_shock=traffic_shock, **kw)
             if not r["feasible"]:
                 excluded.append({"area": area, "reason": r["message"], "min_budget": r["min_budget"]})
@@ -295,7 +171,7 @@ class Engine:
             r_alt = calc(budget, cuisine, area, self.params, rents, traffic_shock=traffic_shock,
                          **{**kw, "space_type": other})
             b = r["scenarios"]["base"]
-            cands.append({"area": area, "nb": nb, "r": r, "stress": stress, "r_alt": r_alt, "prices": prices,
+            cands.append({"area": area, "nb": nb, "r": r, "stress": stress, "r_alt": r_alt,
                           "rents": rents, "other": other,
                           "gap": nb["gap_score"] if nb["gap_reliable"] else 50.0,
                           "payback": b["payback_months"] if b["payback_months"] else np.inf,
@@ -324,8 +200,7 @@ class Engine:
                 "subscores": {"supply_gap_pct": round(float(df.gap_pct[i]), 1),
                               "payback_pct": round(float(df.payback_pct[i]), 1),
                               "traffic_-30%_profit_pct": round(float(df.stress_pct[i]), 1)},
-                "boundary": self.area_boundary.get(c["area"], "neighborhood"),
-                "reasons": self._reasons(c["area"], cuisine, nb, r, st, c["prices"], p_model),
+                "reasons": self._reasons(c["area"], cuisine, nb, r, st, p_model),
                 "competition": {**nb["competition"], "gap_score": round(nb["gap_score"], 1),
                                 "gap_reliable": nb["gap_reliable"]},
                 "license_survival_1000d": {
@@ -347,13 +222,12 @@ class Engine:
                                      c["other"]: c["r_alt"]["scenarios"]["base"]["payback_months"] if c["r_alt"]["feasible"] else None,
                                      "note": "base-case payback months"},
                 "zip_weights": nb["zip_weights"],
-                "live": {"prices": c["prices"], "signals": self._signals_for(c["area"], nb["zip_weights"].keys())},
             })
         ranked.sort(key=lambda x: -x["score"])
         return {"inputs": {"budget": budget, "cuisine": cuisine, "space_type": space_type,
                            "traffic_shock": traffic_shock, "food_shock": food_shock, **person},
                 "top": ranked[:top_n], "all_ranked": [{"area": x["area"], "score": x["score"]} for x in ranked],
-                "excluded": excluded, "live_data": self.live_report, "method": {
+                "excluded": excluded, "method": {
                     "filter": "areas whose minimum store size does not fit the budget are excluded",
                     "score": "mean of three percentile ranks among the remaining areas: supply gap (higher better; "
                              "neutral 50 when the gap model is unreliable for this cuisine), base-case payback months "
@@ -363,10 +237,8 @@ class Engine:
                     "license_survival_1000d": "shown separately, not in the score"},
                 "sources": SOURCES}
 
-    def _reasons(self, area, cuisine, nb, r, stress, prices=None, p_model=None):
+    def _reasons(self, area, cuisine, nb, r, stress, p_model=None):
         c, h, d, out = nb["competition"], nb["history"], nb["demographics"], []
-        if self.area_boundary.get(area) == "zip":
-            out.append("Candidate added from live rent data; boundary = whole ZIP")
         miss = c["zip_gap_missing"]
         if not nb["gap_reliable"]:
             out.append(f"Supply gap not used for {cuisine} (gap model unreliable for this type); counted as neutral")
@@ -381,8 +253,6 @@ class Engine:
         out.append(f"Base case: {r['store']['sqft']} sqft, {r['store']['seats']} seats, profit ${b['monthly_profit']:,}/mo, {pb}")
         out.append(f"If traffic drops 30%: profit ${sb['monthly_profit']:,}/mo"
                    + (" (loss)" if sb["monthly_profit"] <= 0 else ""))
-        if prices and prices["used_as_ticket"]:
-            out.append(f"Ticket ${r['store']['suggested_ticket']} from {prices['n']} live menu-price observations")
         out.append(f"Customer fit {d['fit_ratio']}x city average for {cuisine}; income {d['income_vs_city']}x city median")
         if h["level"].startswith("city"):
             out.append(f"[info] 1,000-day license survival: too few local openings; citywide {h['rate']:.0%} (n={h['n']})")
@@ -417,12 +287,6 @@ class Engine:
                           "properties": {"layer": "zip", "zip": zz,
                                          "gap_score": None if row is None else round(float(row.gap_score), 1),
                                          "low_evidence": None if row is None else bool(row.low_evidence)}})
-        for n, b in self.area_boundary.items():
-            if b == "zip":
-                ring = self.polys[n].tolist()
-                feats.append({"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [ring]},
-                              "properties": {"layer": "neighborhood", "name": n, "score": scores.get(n),
-                                             "excluded_by_budget": n in excl, "boundary": "zip"}})
         gj = {"type": "FeatureCollection", "features": feats}
         path = path or OUT / f"map_{cuisine}.geojson"
         path.write_text(json.dumps(gj))
@@ -437,10 +301,8 @@ def main():
     ap.add_argument("--traffic", type=float, default=1.0, help="traffic shock, e.g. 0.7 = -30%% covers")
     ap.add_argument("--food", type=float, default=1.0, help="food cost shock, e.g. 1.15 = +15%%")
     ap.add_argument("--json", action="store_true", help="print full JSON")
-    ap.add_argument("--live", action="store_true", help="overlay live records from data/live/")
     a = ap.parse_args()
-    from live import LiveStore
-    eng = Engine(live=LiveStore() if a.live else None)
+    eng = Engine()
     res = eng.recommend(a.budget, a.cuisine, a.space, a.traffic, a.food)
     out = OUT / f"recommend_{a.cuisine}_{int(a.budget)}.json"
     out.write_text(json.dumps(res, indent=2, default=float))

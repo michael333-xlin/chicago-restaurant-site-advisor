@@ -224,23 +224,21 @@ From Python: `from recommend import Engine; Engine().recommend(350_000, "asian")
 
 | Product feature | Implementation | Status |
 |---|---|---|
-| 1 Smart site selection | Budget filter → three-measure ranking → top 5 with reasons; map GeoJSON | ✅ Payback can only be computed for the 7 neighborhoods in `rent_by_area.json` (plus new areas with live rents) |
+| 1 Smart site selection | Budget filter → three-measure ranking → top 5 with reasons; map GeoJSON | ✅ Payback can only be computed for the 7 neighborhoods in `rent_by_area.json` |
 | 2 Competition analysis | Count and density of same-type restaurants in the neighborhood, supply gap, 1,000-day license survival for same-type restaurants 2018–2022 | ✅ |
 | 3 Customer fit | Population, employment, income relative to the city, share aged 18–39, `fit_ratio` | ✅ Income is 2008–2012 data |
-| 4 Return on investment | `finance.calc`; `demand_index` replaced with supply gap, `income_index` replaced with actual income ratio | ✅ With live price data, the average ticket uses actual prices; the site also shows "probability the license is still active at payback" |
+| 4 Return on investment | `finance.calc`; `demand_index` replaced with supply gap, `income_index` replaced with actual income ratio | ✅ The site also shows "probability the license is still active at payback" |
 | 5 Risk and stress testing | finance's three checks + −30% traffic scenario; `--traffic` and `--food` can be wired to frontend sliders | ✅ |
-| 6 AI advisor report | Exa fetch, live ingest, agent tool endpoints | ⚠️ Endpoints done, report generation not done |
-| 7 Advisory recommendations | Payback comparison of new build-out vs. taking over a space (`space_comparison`) | ⚠️ Lease checklist and permit checklist not done |
+| 6 AI advisor report | DeepSeek writes a plain-English report from the model results (`narrative.py`, `/api/report`); every number is traced to the results | ✅ Explains the results, never creates numbers |
+| 7 Advisory recommendations | Payback comparison of new build-out vs. taking over a space (`space_comparison`); the plain-English report adds questions to ask before signing and a Chicago license / permit / payroll / lease checklist from cited sources | ✅ |
 
-## Live data and self-iteration (`live.py`, `exa_fetch.py`, `agent_api.py`)
+## Self-iteration and the plain-English report (`agent_api.py`, `narrative.py`)
 
-| | Live overlay (seconds) | Retraining (about 1 minute, plus about 2 minutes to download) |
-|---|---|---|
-| Trigger | Agent calls `ingest_records` | `agent_api.py retrain`, can run weekly via cron |
-| Effect | Openings/closures change supply counts and gaps; agent/manual rents (≥ 3 for the same area) override finance values and add a candidate area for a new ZIP, while rule-extracted rents are evidence only; prices (≥ 3) replace the estimated average ticket; news is attached to results | Reruns step1 → 2 → 2b → 4 → 3. The deployed model (`final_model`) must beat the constant baseline on Brier; within the same metric version, its independent AUC may drop by no more than 0.02 and classifier accuracy by no more than 0.03. Otherwise it rolls back |
-| Records | Every record must have a `source_url` | `model_registry.json` (includes `metric_version`; the baseline resets when metric definitions change); `versions/` keeps the last 5 versions |
+Retraining takes about 1 minute (plus about 2 minutes to download): `agent_api.py retrain`, triggered weekly by `.github/workflows/weekly-refresh.yml`. It reruns step1 → 2 → 2b → 4 → 3. The deployed model (`final_model`) must beat the constant baseline on Brier; within the same metric version, its independent AUC may drop by no more than 0.02 and classifier accuracy by no more than 0.03. Otherwise it rolls back. Versions are recorded in `model_registry.json` (with `metric_version`; the baseline resets when metric definitions change), and `versions/` keeps the last 5.
 
-Field definitions for the four live record kinds are in `live.SCHEMAS`: `places`, `rents`, `prices`, `signals`. Exa requires the `EXA_API_KEY` environment variable. Regex extracts only rents and news automatically; openings, closures and prices are extracted by an agent reading the page, which then calls `ingest_records`. Commands: `agent_api.py fetch | ingest | recommend --live | retrain | status | tools`. Tests with synthetic data: `python3 advantage/test_live.py` (includes checks for the rent replacement rule and optional operator inputs).
+Plain-English report: `narrative.write_report(payload)` calls DeepSeek (`deepseek-flash`, thinking disabled, JSON output). The system prompt holds a field guide, a restaurant-economics primer, number discipline, a section-by-section brief and a self-check list, and contains no numbers itself; `reference_facts()` adds 45 cited Chicago facts from `benchmarks.json`. `validate()` checks the structure and `check_numbers()` traces each number in the text to the payload at its own rounding; on any failure DeepSeek revises once from the problem list, and whatever still fails is returned to the web app. Offline tests: `python3 advantage/test_engine.py` (recommend engine, optional operator inputs, survival scoring, number check, report structure).
+
+Data sources are only the downloaded public datasets, the Overture snapshot and the finance survey. Exa web search was tried for all 56 ZIPs: 280 searches verified 38 openings, 17 closures, 5 rents and 2 prices, too little coverage and biased toward popular neighborhoods, so it is no longer used.
 
 ## Time alignment rules
 
@@ -272,6 +270,6 @@ Openings in year Y (or the Jan 1 snapshot of year Y in the backtest) use only ZI
 
 1. The survival model's signal is weak: independent out-of-time AUC is about 0.61, and the label agrees with actual operating status only about 85% of the time. The license survival curve reflects two-year license renewals, not how long a restaurant operates.
 2. The supply gap comes from comparison with peer areas; it is not demand. Loop, River North and Streeterville have extremely high employment-to-population ratios, so estimates there are extrapolations.
-3. Only 7 neighborhoods have rent data. Other areas need live rent records before payback can be computed.
+3. Only 7 neighborhoods have rent data. Other ZIPs use the median of those 7, so the rent part of the payback estimate is indicative only.
 4. No ZIP population data before 2018 (no Census key).
 5. Dry precincts are 2011 historical data, and precinct boundaries have changed since.

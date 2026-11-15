@@ -1,11 +1,11 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense } from 'react'
 import MonteCarloDrop from '../../charts/MonteCarloDrop'
 import { FanChart, Gauge, StartupBar, Tornado, Waterfall } from '../../charts/Charts'
 import { RANK_COLORS } from '../../colors'
 import { CUISINE_LABEL, CUISINE_SHORT, FORMAT_LABEL, STOREFRONT_LABEL, type Plan, type PlanDetail, type Report } from '../../types'
 import { months, monthsNum, num, pct, usd, usdFull } from '../../format'
 import { CountUp, Reveal } from '../../ui'
-import { loadEvidence, rentInfo, type Evidence } from '../../data/blocks'
+import { rentInfo } from '../../data/blocks'
 
 const Storefront3D = lazy(() => import('../Storefront3D'))
 
@@ -24,44 +24,6 @@ export function Flags({ plan }: { plan: Plan }) {
         <span key={f} className={`flag ${FLAG_TEXT[f].tone}`}>{FLAG_TEXT[f].text}</span>
       ))}
     </>
-  )
-}
-
-function EvidenceList({ zip }: { zip: string }) {
-  const [ev, setEv] = useState<Evidence | null | undefined>(undefined)
-  useEffect(() => {
-    let alive = true
-    loadEvidence(zip).then((e) => alive && setEv(e))
-    return () => {
-      alive = false
-    }
-  }, [zip])
-  if (ev === undefined) return <p className="muted">Loading live evidence…</p>
-  const items = ev
-    ? [
-        ...ev.rents.map((r) => ({ tag: 'Rent', date: r.observed_date, text: `$${r.rent_psf_year}/sq ft/yr asking`, url: r.source_url })),
-        ...ev.prices.map((r) => ({ tag: 'Price', date: r.observed_date, text: `$${r.avg_ticket_usd} average ticket${r.name ? ` · ${r.name}` : ''}`, url: r.source_url })),
-        ...ev.places.map((r) => ({ tag: r.status === 'closed' ? 'Closed' : 'Opened', date: r.event_date, text: r.name ?? '', url: r.source_url })),
-        ...ev.signals.map((r) => ({ tag: r.kind ?? 'News', date: r.published_date, text: r.title ?? r.summary ?? '', url: r.source_url })),
-      ].sort((x, y) => String(y.date ?? '').localeCompare(String(x.date ?? '')))
-    : []
-  if (!items.length)
-    return (
-      <p className="muted">
-        No live records for ZIP {zip} yet. Fetch them with <code>python3 advantage/agent_api.py fetch --zip5 {zip} --cuisine …</code> or{' '}
-        <code>POST /api/live/fetch</code> (see README). Nothing is shown without a source link.
-      </p>
-    )
-  return (
-    <ul className="evidence">
-      {items.slice(0, 12).map((it, n) => (
-        <li key={`${it.url}-${n}`}>
-          <span className="pill">{it.tag}</span>
-          <a href={it.url} target="_blank" rel="noreferrer">{it.text || it.url}</a>
-          <em>{it.date ?? ''}</em>
-        </li>
-      ))}
-    </ul>
   )
 }
 
@@ -179,8 +141,8 @@ export default function SiteDeepDive({ report, index, onIndex }: { report: Repor
           <div className="span2"><dt>Storefront</dt><dd>{STOREFRONT_LABEL[t.storefront]}{t.secondGenEvidence ? ` — ${t.secondGenEvidence}` : ''}</dd></div>
         </dl>
         <p className="muted small">
-          The 3D layout is illustrative: aisles, the bar and the service zone can leave room for fewer tables than the financial model's seat count. Price check vs. nearby menus needs the live
-          competitor search (phase 2); price elasticity is not modelled — the tornado below shows what ±10% on the check does to payback.
+          The 3D layout is illustrative: aisles, the bar and the service zone can leave room for fewer tables than the financial model's seat count. Price check vs. nearby menus is not
+          available in the data; price elasticity is not modelled — the tornado below shows what ±10% on the check does to payback.
         </p>
       </Block>
 
@@ -237,15 +199,13 @@ export default function SiteDeepDive({ report, index, onIndex }: { report: Repor
       </div>
 
       <div className="grid-2">
-        <Block title="Rent" eyebrow="Model estimate vs. live listings">
+        <Block title="Rent" eyebrow="ZIP-level estimate">
           <div className="rent">
             <div><span>Base rent</span><b>${t.block.rentPsf}</b><em>/sq ft/yr</em></div>
             <div><span>Monthly incl. NNN</span><b>{usd(t.rentMonthly)}</b><em>{t.sqft.toLocaleString()} sq ft</em></div>
-            {rent?.kind === 'live' ? (
-              <div><span>Live listings</span><b>{rent.n}</b><em>median ${rent.psf}/sq ft/yr</em></div>
-            ) : (
-              <div className="pending"><span>Live listings</span><b>—</b><em>not fetched for this ZIP yet</em></div>
-            )}
+            <div className={rent?.kind === 'fallback' ? 'pending' : ''}>
+              <span>Source</span><b>{rent?.kind === 'survey' ? 'Survey' : 'Median'}</b><em>{rent?.kind === 'survey' ? 'team survey of this area' : 'of 7 surveyed areas'}</em>
+            </div>
           </div>
           <p className="muted small">
             {rent ? `${rent.kind === 'fallback' ? 'Fallback — ' : ''}${rent.source}.` : 'ZIP-level rent.'} Rent is ZIP level, not block level; replace it with the asking rent of the actual space.
@@ -310,9 +270,6 @@ export default function SiteDeepDive({ report, index, onIndex }: { report: Repor
         </Block>
       </div>
 
-      <Block title="Evidence" eyebrow="Live web data (Exa) · every claim links to its source" className="wide">
-        <EvidenceList zip={t.block.zip} />
-      </Block>
     </div>
   )
 }

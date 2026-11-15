@@ -107,7 +107,7 @@ export type Block = {
   restaurants: number // all restaurants, ring-2
   cuisine: Record<Cuisine, CuisineStats>
   rentPsf: number // $/sq ft/yr base rent (ZIP level)
-  rentKind: 'live' | 'survey' | 'fallback' // live listings, team survey, or citywide fallback
+  rentKind: 'survey' | 'fallback' // team survey, or the median of the surveyed areas
   liquorMoratorium: boolean // block centre inside a dry precinct (City of Chicago, historical 2011 dataset)
   recentClosures: number // restaurant closures nearby, last 12 months (possible 2nd-gen spaces)
   sameAddressClosures: number

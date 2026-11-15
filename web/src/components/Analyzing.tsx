@@ -1,15 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CUISINE_LABEL, RISK_RULE, type Report } from '../types'
-import { dataMeta } from '../data/blocks'
 import { num, reducedMotion, usd } from '../format'
 
 type Step = { title: string; detail: string; ms: number; pending?: boolean }
-
-function liveStep(zip: string): Step {
-  const rent = dataMeta()?.rentByZip[zip]
-  if (rent?.kind === 'live') return { title: 'Live web data (Exa)', detail: `Rent from ${rent.n ?? 0} live listing${rent.n === 1 ? '' : 's'} · evidence in the site report`, ms: 500 }
-  return { title: 'Live web data (Exa)', detail: 'No live listings for this ZIP yet — rent uses the survey / city median', ms: 500, pending: true }
-}
 
 function steps(r: Report): Step[] {
   const { stats, inputs, zip } = r
@@ -24,7 +17,6 @@ function steps(r: Report): Step[] {
     { title: 'Screening every plan', detail: `${num(stats.screened)} plans: blocks × ${sizes} floor sizes × storefront types`, ms: 900 },
     { title: 'Running Monte Carlo', detail: `${num(stats.simulated)} shortlisted plans × ${num(r.draws)} draws × ${r.horizon} months`, ms: 1500 },
     { title: 'Budget filter & ranking', detail: `${num(stats.feasible)} plans fit the ${usd(inputs.budgetMax)} ceiling · ranked by ${RISK_RULE[inputs.risk]}`, ms: 800 },
-    liveStep(zip.zip),
     {
       title: 'Survival model',
       detail: `1,000-day license survival ${Math.round(r.survival.p * 100)}% for a new independent ${CUISINE_LABEL[inputs.cuisine].toLowerCase()} in ${zip.zip}${r.survival.source === 'api' ? ' · your inputs applied' : ' · ZIP averages'}`,

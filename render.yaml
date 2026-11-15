@@ -16,5 +16,5 @@ services:
         value: /var/plategap/output
       - key: ADMIN_TOKEN
         generateValue: true   # copy it from the Render dashboard for the API calls in the README
-      - key: EXA_API_KEY
-        sync: false           # paste your Exa key in the dashboard
+      - key: DEEPSEEK_API_KEY
+        sync: false           # paste your DeepSeek key in the dashboard (plain-English report writer)
