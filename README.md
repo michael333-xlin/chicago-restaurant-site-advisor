@@ -8,6 +8,12 @@ Every number comes from the downloaded public data and the trained models. Each 
 
 This document covers **how to run and deploy** the project. For model methodology and validation results, see [advantage/README.md](advantage/README.md). For product design, see [docs/](docs/).
 
+## Demo
+
+[![Watch the demo](https://img.youtube.com/vi/V6KG62yBcaI/hqdefault.jpg)](https://youtu.be/V6KG62yBcaI)
+
+▶️ [Watch the demo on YouTube](https://youtu.be/V6KG62yBcaI)
+
 ## Quick start
 
 **Try it in your browser (free, nothing to install):**
