@@ -1,277 +1,277 @@
-# OpeningTable：芝加哥餐厅选址模型
+# OpeningTable: Chicago Restaurant Site Model
 
-> 部署、运行和抓取新数据的步骤见仓库根目录的 [README.md](../README.md)。本文只说明模型方法和验证结果。
+> For deployment, running the app and fetching new data, see [README.md](../README.md) in the repository root. This document covers only the model methodology and validation results.
 
-问题：**预算有限的独立餐厅，开在芝加哥哪个社区最有优势？**
+The question: **for an independent restaurant on a limited budget, which Chicago neighborhood gives it the best advantage?**
 
-输入预算和餐厅类型，先按预算排除开不起的社区，再按三个可以检验的量给剩下的社区排名：
+Given a budget and restaurant type, the model first drops neighborhoods the budget can't afford, then ranks the rest on three testable measures:
 
-| 排名依据 | 含义 | 来源 |
+| Ranking input | Meaning | Source |
 |---|---|---|
-| 供给缺口 | **相似商圈的菜系供给基准差**：和人口、就业、收入结构相近、餐厅总数相同的 ZIP 相比，这里这类店少了多少家。它不是需求预测 | Overture 快照 + ZIP 特征，留一 ZIP 的 Poisson 模型（step3），历史回测见 step4 |
-| 基础情景回本月数 | 队友的 `finance.calc` 算出的回本月数 | finance/ |
-| 客流 −30% 时的月利润 | 同一个模型，把客流乘以 0.7 | finance/ |
+| Supply gap | **Cuisine supply shortfall vs. peer areas**: compared with ZIPs that have similar population, employment and income structure and the same total number of restaurants, how many fewer restaurants of this type are here. It is not a demand forecast | Overture snapshot + ZIP features, leave-one-ZIP-out Poisson model (step3); historical backtest in step4 |
+| Base-case payback months | Payback months from teammate's `finance.calc` | finance/ |
+| Monthly profit at −30% traffic | Same model, with traffic multiplied by 0.7 | finance/ |
 
-`score` = 三项在候选社区里的百分位排名的平均值。某个菜系的缺口模型不可靠时，缺口一项按中性 50 计。
+`score` = the average of the three measures' percentile ranks among candidate neighborhoods. When the gap model is unreliable for a cuisine, the gap measure is set to a neutral 50.
 
-**1,000 天执照存续估计**会单独展示，**不参与打分**。它的信号偏弱：独立店的时间外 AUC 约 0.61，而且标签本身有噪声（见 step2b）。用户可以补充自己的经营经验、注册方式和具体地址，模型据此重算；不填的项用该 ZIP 近年独立店开业样本的均值。
+The **1,000-day license survival estimate** is shown separately and **does not affect the score**. Its signal is weak: out-of-time AUC for independent restaurants is about 0.61, and the label itself is noisy (see step2b). Users can add their own operating experience, entity type and specific address, and the model recomputes; any field left blank uses the mean of recent independent openings in that ZIP.
 
-## 运行
+## Running
 
-在仓库根目录执行（Python 3，依赖 pandas、numpy、scikit-learn、statsmodels、scipy、pyarrow、matplotlib、requests）：
+From the repository root (Python 3; requires pandas, numpy, scikit-learn, statsmodels, scipy, pyarrow, matplotlib, requests):
 
 ```bash
-bash advantage/step0_download.sh                         # 下载公开数据到 data/raw/，并写入 MANIFEST.json（固定快照）
-cp ~/Downloads/chicago_restaurant_categories.csv data/   # Overture 快照，11,875 条；也可以用环境变量 RESTAURANT_CSV 指定
-python3 advantage/snapshot.py check                      # 确认 data/raw/ 和快照清单一致
-python3 advantage/step1_cuisine_classifier.py            # 店名 → 菜系，按店名分组的交叉验证 + 折外预测
-python3 advantage/step2_survival_model.py                # 去泄漏的存续模型，滚动验证、校准、消融
-python3 advantage/step2b_label_audit.py                  # 核对标签口径（换证、迁址、中断、食品检查）
-python3 advantage/step4_backtest_gap.py                  # 供给缺口回测和稳定性（要在 step3 之前跑）
-python3 advantage/step3_advantage_index.py               # ZIP × 菜系的缺口分、存续估计，以及 finance 汇总
-python3 advantage/export_web.py                          # 导出前端用的街区数据到 output/web_data/
+bash advantage/step0_download.sh                         # Download public data to data/raw/ and write MANIFEST.json (pinned snapshot)
+cp ~/Downloads/chicago_restaurant_categories.csv data/   # Overture snapshot, 11,875 rows; or set the RESTAURANT_CSV environment variable
+python3 advantage/snapshot.py check                      # Confirm data/raw/ matches the snapshot manifest
+python3 advantage/step1_cuisine_classifier.py            # Name → cuisine, name-grouped cross-validation + out-of-fold predictions
+python3 advantage/step2_survival_model.py                # Leakage-free survival model, rolling validation, calibration, ablation
+python3 advantage/step2b_label_audit.py                  # Audit the label definition (reissues, relocations, gaps, food inspections)
+python3 advantage/step4_backtest_gap.py                  # Supply gap backtest and stability (run before step3)
+python3 advantage/step3_advantage_index.py               # ZIP × cuisine gap scores, survival estimates, finance summary
+python3 advantage/export_web.py                          # Export block data for the frontend to output/web_data/
 python3 advantage/recommend.py --budget 250000 --cuisine fast_food
 ```
 
-也可以一条命令跑完 step1–4 和导出，并做版本比较：`python3 advantage/agent_api.py retrain --no-download`，约 1 分钟。每份报告都带 `snapshot_id`，**只有 id 相同的报告才能互相比较**。第二轮的数字来自快照 `4cd24f7051fa`（2026-11-14 下载；比 `22397a5a242b` 只多了禁酒选区文件，训练数据相同）。第一轮的数字来自快照 `1f4965d4c768`；用 2026-11-14 重新下载的数据和第一轮代码重跑，所有能复现的指标完全一致。
+You can also run steps 1–4 plus export, with version comparison, in one command: `python3 advantage/agent_api.py retrain --no-download` (about 1 minute). Every report carries a `snapshot_id`, and **only reports with the same id are comparable**. Round 2 numbers come from snapshot `4cd24f7051fa` (downloaded 2026-11-14; it differs from `22397a5a242b` only by the added dry-precinct file, so the training data is identical). Round 1 numbers come from snapshot `1f4965d4c768`; rerunning round 1 code on data re-downloaded on 2026-11-14 reproduces every reproducible metric exactly.
 
-## 第二轮：数据审计与模型改进（2026-11-14，快照 4cd24f7051fa）
+## Round 2: data audit and model improvements (2026-11-14, snapshot 4cd24f7051fa)
 
-### 0. 有没有随机或虚假数据
+### 0. Is any data random or fabricated?
 
-- Python 管线里，随机数只用于固定种子的抽样：step3 每个 ZIP 抽 40 个点、step4 的 ZIP 分组、审计抽样。没有生成任何数据。`test_live.py` 的合成记录只写进临时目录。
-- 追溯检查：用 `survival_model.pkl` 重新打分，和 CAI 表的最大差 4.9e-5（四舍五入）；网页街区的 `survivalModel1000d` 等于 CAI 加权值；街区餐厅数和原始 Overture 文件逐格一致。
-- 置换检验：打乱标签后，同一套滚动验证的 AUC 是 0.49–0.50，真实标签是 0.56–0.61，说明信号是真的。
-- 不来自训练模型的部分：浏览器里的回本和损益由财务参数表加蒙特卡洛算出，参数出处见网页的 Assumptions 表；租金只到 ZIP 层面，86% 的街区用 7 个调研社区的中位数。
+- In the Python pipeline, random numbers are used only for fixed-seed sampling: 40 points per ZIP in step3, ZIP grouping in step4, and audit samples. No data is generated.
+- Traceability checks: rescoring with `survival_model.pkl` matches the CAI table with a maximum difference of 4.9e-5 (rounding); the web blocks' `survivalModel1000d` equals the weighted CAI value; block restaurant counts match the raw Overture file cell by cell.
+- Permutation test: with shuffled labels, the same rolling validation gives AUC 0.49–0.50, versus 0.56–0.61 with real labels, so the signal is real.
+- Parts that do not come from trained models: in-browser payback and P&L come from the financial parameter table plus Monte Carlo, with parameter sources shown in the site's Assumptions table. Rent is ZIP-level only, and 86% of blocks use the median of the 7 surveyed neighborhoods.
 
-### 1. 存续模型：新增 3 个时点特征
+### 1. Survival model: 3 new point-in-time features
 
-都只用开业当天 t 之前的信息（`features.LicenseHistory`）：
+All use only information from before the opening date t (`features.LicenseHistory`):
 
-| 特征 | 定义 |
+| Feature | Definition |
 |---|---|
-| `log_acct_prior_c` | 同一账户号在 t 之前开始的**其他**执照数，封顶 10（防止线性模型对大账户外推） |
-| `entity` | 开业那条执照记录的法人名是公司（LLC、Inc、Corp 等）为 1，个人为 0 |
-| `log_addr5_ended` | 同一地址（去掉楼层、单元号）上，t 之前 5 年内到期且过期 60 天仍未续的食品执照数 |
+| `log_acct_prior_c` | Number of **other** licenses under the same account number that started before t, capped at 10 (so the linear model doesn't extrapolate on large accounts) |
+| `entity` | 1 if the legal name on the opening license record is a company (LLC, Inc, Corp, etc.), 0 if an individual |
+| `log_addr5_ended` | Number of food licenses at the same address (floor and unit removed) that expired in the 5 years before t and were still not renewed 60 days after expiry |
 
-地址特征最早统计的是"餐厅类"执照，但旧记录大多没填 business_activity，导致特征均值从 2013 年的 0.04 涨到 2022 年的 0.52，造成校准变差。改成固定 5 年窗口、统计全部食品执照后，各年稳定在 0.65–0.76。
+The address feature originally counted only "restaurant-type" licenses, but most old records leave business_activity blank, so the feature mean rose from 0.04 in 2013 to 0.52 in 2022 and hurt calibration. After switching to a fixed 5-year window counting all food licenses, it is stable at 0.65–0.76 across years.
 
-**同一套滚动验证（测试集 3,907 家，独立店 2,764 家）**
+**Same rolling validation (test set 3,907 restaurants, 2,764 independent)**
 
-| 特征组合（逻辑回归） | 独立店 AUC | 全部 AUC | Brier（全部） | 校准斜率 |
+| Feature set (logistic regression) | Independent AUC | All AUC | Brier (all) | Calibration slope |
 |---|---|---|---|---|
-| 第一轮选中的模型（无经营者、无地址） | 0.570 | 0.563 | 0.199 | 0.48 |
-| 加地址历史 | 0.583 | 0.576 | — | — |
-| 加经营者 | 0.596 | 0.600 | — | — |
-| **加经营者和地址（第二轮选中，`no_chain_no_local`）** | **0.607** | **0.611** | **0.1925** | **0.64** |
-| 全部特征（含连锁和 500m 竞争） | 0.606 | 0.628 | 0.191 | 0.69 |
+| Round 1 selected model (no operator, no address) | 0.570 | 0.563 | 0.199 | 0.48 |
+| + address history | 0.583 | 0.576 | — | — |
+| + operator | 0.596 | 0.600 | — | — |
+| **+ operator and address (round 2 selection, `no_chain_no_local`)** | **0.607** | **0.611** | **0.1925** | **0.64** |
+| All features (incl. chain and 500m competition) | 0.606 | 0.628 | 0.191 | 0.69 |
 
-- 常数基线的 Brier 是 0.1996。选择规则不变：独立店 AUC 最高，差距在 0.005 以内选特征更少的。
-- 分测试年的独立店 AUC：2018–2022 年依次为 0.538、0.600、0.625、0.627、0.699；第一轮模型是 0.506、0.551、0.551、0.632、0.645。第一轮模型在 2018 年基本等于随机。
-- 按测试年分层 bootstrap 2,000 次：独立店 AUC 提升 +0.035，95% 区间 [0.018, 0.052]；全部样本提升 +0.047，区间 [0.032, 0.062]。
-- 用营业口径的替代标签（step2b）验证：独立店 AUC 从 0.537 升到 0.574，所以提升不只是"执照续没续"。
-- 新的再校准参数为 a = 0.54，b = 0.64。
-- 还试过调参的 GBM（更差）、逻辑回归加 GBM 的集成（+0.002，不值得增加复杂度）、开业月份和离 L 站的距离（没有增益）。
+- The constant baseline's Brier is 0.1996. The selection rule is unchanged: highest independent AUC, choosing fewer features when within 0.005.
+- Independent AUC by test year, 2018–2022: 0.538, 0.600, 0.625, 0.627, 0.699; the round 1 model scored 0.506, 0.551, 0.551, 0.632, 0.645. The round 1 model was essentially random in 2018.
+- Bootstrap stratified by test year, 2,000 draws: independent AUC improves by +0.035, 95% interval [0.018, 0.052]; all-sample AUC improves by +0.047, interval [0.032, 0.062].
+- Checked against the operating-status alternative label (step2b): independent AUC rises from 0.537 to 0.574, so the gain is not just about "was the license renewed."
+- New recalibration parameters: a = 0.54, b = 0.64.
+- Also tried: tuned GBM (worse), logistic regression + GBM ensemble (+0.002, not worth the complexity), opening month and distance to an L station (no gain).
 
-**给假想新店打分时**（step3、`/api/survival`）：经营者和地址特征默认取该 ZIP 2020–2022 年独立店开业样本的均值（不足 10 家用全市均值，56 个 ZIP 中有 6 个）。用户可以填写此前持有的执照数、注册方式和具体地址，填了的项替换默认值；结果会标明每一项来自用户还是 ZIP 均值。地址按芝加哥执照数据里的同一门牌查找，查不到也可能只是写法不同，接口会返回匹配到的执照数。
+**Scoring a hypothetical new restaurant** (step3, `/api/survival`): operator and address features default to the mean of 2020–2022 independent openings in that ZIP (the citywide mean when there are fewer than 10, which applies to 6 of 56 ZIPs). Users can enter the number of licenses previously held, entity type and a specific address; filled-in fields replace the defaults, and the result marks whether each input came from the user or the ZIP mean. Addresses are matched against the same street number in Chicago license data. A miss may just mean a different spelling, so the endpoint returns the number of licenses matched.
 
-### 2. 执照存续曲线（新增）
+### 2. License survival curve (new)
 
-- 用全部开业样本做执照存续时长的 Kaplan–Meier 曲线（截至数据日期截尾）。某个选址的曲线按比例风险换算：`S_site(m) = S_city(m) ^ (log p_site / log S_city(1000 天))`。
-- 网页把它和每次蒙特卡洛的回本月份结合，得到"**回本时执照仍有效的概率**"。
-- 时间外检验（每个测试年用之前的数据建曲线，再校准参数用其他年份拟合）：
+- A Kaplan–Meier curve of license duration built from all openings (censored at the data date). A site's curve is scaled by proportional hazards: `S_site(m) = S_city(m) ^ (log p_site / log S_city(1000 days))`.
+- The site combines it with each Monte Carlo run's payback month to give the "**probability the license is still active at payback**."
+- Out-of-time test (for each test year, the curve is built from earlier data and recalibration parameters are fit on other years):
 
-| 月份 | 预测执照仍有效 | 实际 | 五分位平均误差 | AUC |
+| Month | Predicted license active | Actual | Mean quintile error | AUC |
 |---|---|---|---|---|
 | 12 | 99.5% | 99.4% | 0.006 | 0.55 |
 | 24 | 96.5% | 96.5% | 0.019 | 0.47 |
 | 36 | 73.2% | 71.7% | 0.053 | 0.62 |
 
-- 芝加哥的执照两年一期，关店要到期满才体现出来，所以曲线在第 24–25 个月和第 48–50 个月有台阶，24 个月内几乎没有区分度。这条曲线表示"执照仍有效"，**不等于"仍在营业"**。
+- Chicago licenses run in two-year terms, and a closure only shows up when the term ends, so the curve has steps at months 24–25 and 48–50 and almost no discrimination within the first 24 months. The curve means "license still active," **not "still operating."**
 
-### 3. 供给缺口模型：正则化 alpha 1.0 → 0.1
+### 3. Supply gap model: regularization alpha 1.0 → 0.1
 
-| | alpha = 1.0（第一轮） | alpha = 0.1（第二轮） |
+| | alpha = 1.0 (round 1) | alpha = 0.1 (round 2) |
 |---|---|---|
-| 年度执照快照上的留一 ZIP 相关性（9 年平均） | 0.732 | 0.764 |
-| 回测系数（控制菜系、年份、连锁） | 0.027（p = 0.059） | 0.035（p = 0.042） |
-| Q5 高于 Q4 的年份 | 7/9 | 6/9 |
+| Leave-one-ZIP-out correlation on annual license snapshots (9-year mean) | 0.732 | 0.764 |
+| Backtest coefficient (controlling for cuisine, year, chain) | 0.027 (p = 0.059) | 0.035 (p = 0.042) |
+| Years where Q5 beats Q4 | 7/9 | 6/9 |
 
-- alpha 是从 5 个变体（0.1、0.3、1、3，以及加两个特征）里挑出来的，回测 p 值要打折扣看。选它主要是因为模型本身预测各 ZIP 店数的能力更强。
-- Q5 高于 Q4 的年份降到 6/9，低于 70%，所以按 step4 的既定规则，缺口分在 Q4/Q5 分界（gap_z = 0.525）处**封顶**。
-- 各菜系留一相关性（Overture）提高，其中牛排馆从 0.31 升到 0.52、炸鸡从 0.31 升到 0.50、加勒比/非洲菜从 0.05 升到 0.21。牛排馆越过了 0.4 的门槛，它的缺口分现在参与排名。
+- alpha was picked from 5 variants (0.1, 0.3, 1, 3, and one with two extra features), so the backtest p-value should be discounted. It was chosen mainly because the model predicts per-ZIP restaurant counts better.
+- Years where Q5 beats Q4 dropped to 6/9, below 70%, so under step4's predefined rule the gap score is **capped** at the Q4/Q5 boundary (gap_z = 0.525).
+- Per-cuisine leave-one-out correlation (Overture) improved: steakhouses 0.31 → 0.52, fried chicken 0.31 → 0.50, Caribbean/African 0.05 → 0.21. Steakhouses crossed the 0.4 threshold, so their gap score now counts in the ranking.
 
-| 缺口五分位（2014–2022 年开业 3,760 家） | 1,000 天执照存续率 |
+| Gap quintile (3,760 openings, 2014–2022) | 1,000-day license survival |
 |---|---|
-| Q1 供给最多 | 67.4% |
+| Q1 most supply | 67.4% |
 | Q2 | 69.0% |
 | Q3 | 70.7% |
 | Q4 | 72.1% |
-| Q5 供给最少 | 73.7% |
+| Q5 least supply | 73.7% |
 
-### 4. 菜系分类器：没有改进空间
+### 4. Cuisine classifier: no room for improvement
 
-C 取 4–32、字符 n-gram 改为 (1,6) 或 (2,6)，按名称分组交叉验证的准确率都在 64.8% ± 0.15% 以内，只是精度和覆盖率互换。只靠店名已经到顶，没有改动。
+With C from 4–32 and character n-grams changed to (1,6) or (2,6), name-grouped cross-validation accuracy stays within 64.8% ± 0.15%; settings only trade precision for coverage. Names alone have hit the ceiling, so nothing was changed.
 
-### 5. 回滚检查
+### 5. Rollback check
 
-`agent_api.py` 原来用全特征 GBM 的 AUC 和 Brier 判断能否上线，但上线的是按独立店 AUC 选出的逻辑回归。现在 step2 报告写出 `final_model`（上线模型的时间外指标），回滚检查改用它，`METRIC_VERSION` 升到 3。
+`agent_api.py` used to decide promotion based on the all-feature GBM's AUC and Brier, while the deployed model is the logistic regression selected by independent AUC. The step2 report now writes `final_model` (the deployed model's out-of-time metrics), the rollback check uses it, and `METRIC_VERSION` is bumped to 3.
 
-## 第一轮：审阅后的修正与结果（快照 1f4965d4c768）
+## Round 1: post-review fixes and results (snapshot 1f4965d4c768)
 
-> 以下是第一轮的结果。最终选中的模型、step4 的五分位和缺口模型的数字已被第二轮更新，以上一节为准。
+> These are round 1 results. The final selected model, step4 quintiles and gap model numbers were updated in round 2; the section above takes precedence.
 
-### 1. 存续模型：去掉时间泄漏
+### 1. Survival model: removing time leakage
 
-| 问题 | 修正前 | 修正后 |
+| Issue | Before | After |
 |---|---|---|
-| 全市和 ZIP 的历史存续率 | 全市先验用了全样本的平均值 | 只用 t 之前**已经满 1,000 天**的标签；最早的标签成熟之前是缺失值 |
-| 训练集和验证集的边界 | 训练 2013–2018、测试 2019–2022，2018 年开业样本的标签要到 2021 年才知道 | 滚动验证：测试年份 Y = 2018–2022，训练集只包含 **Y 年 1 月 1 日前标签已经成熟**的开业样本 |
-| 历史人口缺失 | 用后面年份的数据回填（83.5% 的样本用到了"未来"人口） | 不回填，2018 年以前为缺失值（76% 的样本） |
-| 竞争、连锁、菜系用的店名和地址 | 每个执照号取**最新**的名称和地址 | 改用执照的每一条记录：t 时刻有效的那条记录上的名称和地址（`license_spans.parquet`）。迁址、改名不会倒灌到过去 |
-| 连锁标识 | 按执照最新名称计算 | t 之前用过同一名称的**其他**执照数 |
-| 菜系标签 | 分类器在样本内预测 | 折外预测：每个店名都由训练时没见过这个名字的模型来预测 |
+| Citywide and ZIP historical survival rates | The citywide prior used the full-sample mean | Uses only labels that had **reached 1,000 days** before t; missing until the earliest labels mature |
+| Train/test boundary | Train 2013–2018, test 2019–2022; labels for 2018 openings weren't known until 2021 | Rolling validation: test years Y = 2018–2022, training only on openings whose labels **had matured before Jan 1 of Y** |
+| Missing historical population | Backfilled from later years (83.5% of samples used "future" population) | No backfill; missing before 2018 (76% of samples) |
+| Names and addresses for competition, chain and cuisine | The **latest** name and address for each license number | Uses every license record: the name and address on the record active at t (`license_spans.parquet`). Relocations and renames no longer leak into the past |
+| Chain flag | Computed from the license's latest name | Number of **other** licenses that used the same name before t |
+| Cuisine label | Classifier predicted in-sample | Out-of-fold predictions: each name is predicted by a model that never saw it in training |
 
-### 2. 同一套验证下比较模型（滚动验证，测试集 3,907 家）
+### 2. Comparing models under the same validation (rolling validation, test set 3,907)
 
-| | README 原版（单次切分） | 原版特征表 + 新验证 | **修正版** |
+| | Original README (single split) | Original feature table + new validation | **Fixed version** |
 |---|---|---|---|
-| AUC 全部：GBM / 逻辑回归 | 0.608 / 0.606 | 0.583 / 0.583 | **0.585 / 0.596** |
-| AUC 独立店：GBM / 逻辑回归 | — | 0.562 / 0.564 | **0.562 / 0.570** |
-| 各测试年 AUC 均值 ± 标准差（逻辑回归） | — | 0.592 | 0.600 ± 0.036 |
-| Brier 全部：常数 / GBM / 逻辑回归 | 0.205 / 0.199 / 0.200 | 0.200 / 0.199 / 0.203 | 0.200 / 0.198 / **0.196** |
-| 校准 ECE：GBM / 逻辑回归 | — | 0.075 / 0.091 | 0.066 / 0.068 |
-| 校准斜率：GBM / 逻辑回归 | — | 0.49 / 0.38 | 0.53 / 0.61 |
+| AUC all: GBM / logistic | 0.608 / 0.606 | 0.583 / 0.583 | **0.585 / 0.596** |
+| AUC independent: GBM / logistic | — | 0.562 / 0.564 | **0.562 / 0.570** |
+| Per-test-year AUC mean ± SD (logistic) | — | 0.592 | 0.600 ± 0.036 |
+| Brier all: constant / GBM / logistic | 0.205 / 0.199 / 0.200 | 0.200 / 0.199 / 0.203 | 0.200 / 0.198 / **0.196** |
+| Calibration ECE: GBM / logistic | — | 0.075 / 0.091 | 0.066 / 0.068 |
+| Calibration slope: GBM / logistic | — | 0.49 / 0.38 | 0.53 / 0.61 |
 
-结论：
-- **README 原来的 0.608，主要是验证方式偏宽松造成的**。原版特征表放到同一套滚动验证里只剩 0.583，修正版是 0.585–0.596。泄漏本身带来的虚高很小。
-- **逻辑回归不比 GBM 差**，校准也更好，所以没有继续试 XGBoost 或 LightGBM。
-- 各测试年的 AUC 随训练数据增加而上升：0.54（2018 年测试，训练集只有 2,016 家）→ 0.65（2022 年测试）。
-- **校准斜率约 0.5，说明原始预测过于极端**。所以用滚动验证的时间外预测拟合了一层 logistic 再校准（a = 0.70，b = 0.48）。拟合后的 ECE 是 0.014，但这是在拟合数据上测的，结果偏乐观。
-- 常数基线的合并 AUC 是 0.456，低于 0.5。这是因为各测试年的存活率不同（2018 年 82%，其他年份 70–73%），把几年合在一起算 AUC 会出现这种偏差。单年的 AUC 都是 0.5。
+Conclusions:
+- **The original README's 0.608 came mostly from a lenient validation setup.** Under the same rolling validation, the original feature table drops to 0.583, and the fixed version scores 0.585–0.596. Leakage itself inflated the result only slightly.
+- **Logistic regression is no worse than GBM** and is better calibrated, so XGBoost and LightGBM were not tried.
+- Per-test-year AUC rises as training data grows: 0.54 (2018 test, only 2,016 training restaurants) → 0.65 (2022 test).
+- **A calibration slope around 0.5 means the raw predictions are too extreme.** A logistic recalibration layer was fit on the rolling-validation out-of-time predictions (a = 0.70, b = 0.48). The resulting ECE is 0.014, but that is measured on the data it was fit to, so it is optimistic.
+- The constant baseline's pooled AUC is 0.456, below 0.5. This is because survival rates differ across test years (82% in 2018, 70–73% in other years), and pooling years for AUC produces this bias. Each single-year AUC is 0.5.
 
-**消融（合并 AUC；独立店 / 全部）**
+**Ablation (pooled AUC; independent / all)**
 
-| 特征组合 | 逻辑回归：独立店 | 逻辑回归：全部 | GBM：独立店 |
+| Feature set | Logistic: independent | Logistic: all | GBM: independent |
 |---|---|---|---|
-| 全部特征 | 0.570 | 0.596 | 0.562 |
-| 去掉连锁标识 | 0.568 | 0.560 | 0.558 |
-| 去掉连锁 + 500m 竞争 | **0.570** | 0.563 | 0.564 |
-| 去掉连锁 + ZIP 特征与 ZIP 历史 | 0.550 | 0.544 | 0.542 |
-| 只用位置特征（竞争 + ZIP） | 0.564 | 0.552 | 0.559 |
-| 只用菜系和业态 | 0.520 | 0.520 | 0.521 |
+| All features | 0.570 | 0.596 | 0.562 |
+| Drop chain flag | 0.568 | 0.560 | 0.558 |
+| Drop chain + 500m competition | **0.570** | 0.563 | 0.564 |
+| Drop chain + ZIP features and ZIP history | 0.550 | 0.544 | 0.542 |
+| Location features only (competition + ZIP) | 0.564 | 0.552 | 0.559 |
+| Cuisine and format only | 0.520 | 0.520 | 0.521 |
 
-- 连锁标识只对全样本有用（0.596 → 0.560），**对独立店没有作用**。
-- **500m 竞争特征没有增益**。
-- **有信号的是 ZIP 层面的特征**：人口经济特征和 ZIP 历史存续率，去掉后独立店 AUC 从 0.568 降到 0.550。
-- 最终模型：逻辑回归，用"菜系 + 业态 + ZIP 特征 + ZIP 历史"（`no_chain_no_local`）。选择规则是独立店 AUC 最高，差距在 0.005 以内时选特征更少的。
-- 历史租金特征没有加：找不到能对齐到开业时点的租金数据。
+- The chain flag helps only on the full sample (0.596 → 0.560) and **does nothing for independent restaurants**.
+- **500m competition features add nothing.**
+- **The signal is in ZIP-level features**: demographic/economic features and ZIP historical survival. Removing them drops independent AUC from 0.568 to 0.550.
+- Final model: logistic regression with "cuisine + format + ZIP features + ZIP history" (`no_chain_no_local`). The selection rule is highest independent AUC, choosing fewer features when within 0.005.
+- Historical rent features were not added: no rent data could be aligned to opening dates.
 
-### 3. 标签口径核对（step2b，8,595 家）
+### 3. Label definition audit (step2b, 8,595 restaurants)
 
-当前标签：执照存续 ≥ 1,000 天。用执照记录和食品检查（4ijn-s7e5）核对：
+Current label: license survives ≥ 1,000 days. Checked against license records and food inspections (4ijn-s7e5):
 
-| 情况 | 标记为"存活"的样本 | 标记为"关店"的样本 |
+| Case | Labeled "survived" | Labeled "closed" |
 |---|---|---|
-| 迁址：同一账户 180 天内领了 C_LOC 新执照。芝加哥迁址会**换一个执照号**，旧执照就算"关店" | — | 0.7% |
-| 同名同地址 180 天内换了新执照号（换主体或换老板） | — | 1.8% |
-| 同地址 180 天内出现任何新执照（新租户或改名，无法区分） | — | 22.8% |
-| 执照中断：两条记录之间空档超过 60 天 | 0.2% | 0% |
-| 第 1,000 天之前检查结果已经是 Out of Business | **9.3%** | — |
-| 执照到期 90 天后仍有检查记录 | — | **27.9%** |
+| Relocation: same account got a C_LOC license within 180 days. In Chicago a relocation **issues a new license number**, so the old license counts as "closed" | — | 0.7% |
+| Same name and address got a new license number within 180 days (new entity or owner) | — | 1.8% |
+| Any new license at the same address within 180 days (new tenant or rename, indistinguishable) | — | 22.8% |
+| License gap: more than 60 days between two records | 0.2% | 0% |
+| Inspection result already Out of Business before day 1,000 | **9.3%** | — |
+| Inspections still recorded 90+ days after license expiry | — | **27.9%** |
 
-- 按营业状态做一个替代标签：迁址、同名重新领照、到期后仍被检查的，改为"存活"；1,000 天内检查结果为 Out of Business 的，改为"关店"。替代标签和当前标签只有 **84.5%** 一致，770 个样本从关店改为存活，560 个从存活改为关店。
-- 同一个模型拿替代标签来验证，AUC 是 0.537，低于原标签的 0.563。所以模型学到的有一部分是"执照有没有续"，不完全是"店还开不开"。
-- 抽查样本在 `output/step2b_label_samples.csv`，每类最多 15 条，供人工核对。
+- An alternative label based on operating status: relocations, same-name relicensing and post-expiry inspections are changed to "survived"; Out of Business inspection results within 1,000 days are changed to "closed." The alternative label agrees with the current one only **84.5%** of the time: 770 samples flip from closed to survived and 560 from survived to closed.
+- Validated against the alternative label, the same model scores AUC 0.537, below 0.563 on the original label. So part of what the model learns is "was the license renewed," not purely "is the restaurant still open."
+- Sample rows are in `output/step2b_label_samples.csv`, up to 15 per case, for manual review.
 
-### 4. 菜系分类器（step1）
+### 4. Cuisine classifier (step1)
 
-- 按归一化店名分组做 5 折交叉验证，同名连锁店不会同时出现在训练集和测试集。菜系准确率 **64.8%**，原来随机切分是 71%，多数类基线是 22%。置信度 ≥ 0.5 时精度 78.1%，覆盖 72.7%。
-- 各菜系见 `step1_classifier_report.json`。墨西哥菜和披萨在置信度 ≥ 0.5 时精度超过 0.88。**欧洲菜 0.24、健康轻食 0.36、海鲜 0.50、牛排馆 0.52**，这几类在历史数据上的标签不可靠。
-- 迁移检查，即折外预测能否用到已关闭的历史店：已关闭的开业样本中 50.3% 拿到高置信度菜系，存活的是 48.6%，两者接近，说明菜系是否已知和结果无关。已关闭店的预测抽样在 `step1_closed_sample.csv`，供人工核对。
+- 5-fold cross-validation grouped by normalized name, so same-name chain locations never appear in both training and test. Cuisine accuracy is **64.8%** (versus 71% with the earlier random split; majority-class baseline 22%). At confidence ≥ 0.5, precision is 78.1% with 72.7% coverage.
+- Per-cuisine results are in `step1_classifier_report.json`. Mexican and pizza exceed 0.88 precision at confidence ≥ 0.5. **European 0.24, healthy/light 0.36, seafood 0.50, steakhouse 0.52**: these labels are unreliable on historical data.
+- Transfer check (can out-of-fold predictions be applied to closed historical restaurants?): 50.3% of closed openings get a high-confidence cuisine versus 48.6% of survivors. The two are close, so whether cuisine is known is unrelated to the outcome. A sample of predictions for closed restaurants is in `step1_closed_sample.csv` for manual review.
 
-### 5. 供给缺口的稳定性（step4，2014–2022 年开业的 3,760 家）
+### 5. Supply gap stability (step4, 3,760 openings, 2014–2022)
 
-| 缺口五分位 | 1,000 天执照存续率 | n |
+| Gap quintile | 1,000-day license survival | n |
 |---|---|---|
-| Q1 供给最多（相对相似商圈） | 67.6% | 754 |
+| Q1 most supply (relative to peer areas) | 67.6% | 754 |
 | Q2 | 70.1% | 750 |
 | Q3 | 70.9% | 756 |
 | Q4 | 71.6% | 750 |
-| Q5 供给最少 | 72.7% | 750 |
+| Q5 least supply | 72.7% | 750 |
 
-- 修正后五档是单调的。原版 Q5 的 72.1% 低于 Q4 的 74.2%，现在不再这样。
-- 控制菜系、年份、连锁后，系数为 0.027（p = 0.059）；不加控制时 p = 0.008。
-- 跨年份：9 年中 6 年系数为正，7 年 Q5 高于 Q4，7 年 Q5 高于 Q1。
-- 跨 ZIP：5 个随机 ZIP 组中 4 组系数为正，南北两半都为正。
-- 结论：信号弱，但方向稳定，所以只作为三项排名依据之一，不封顶（规则：Q5 高于 Q4 的年份少于 70% 时才封顶）。
+- After the fixes, the five quintiles are monotonic. In the original, Q5's 72.1% was below Q4's 74.2%; that no longer happens.
+- Controlling for cuisine, year and chain, the coefficient is 0.027 (p = 0.059); without controls, p = 0.008.
+- Across years: the coefficient is positive in 6 of 9 years, Q5 beats Q4 in 7, and Q5 beats Q1 in 7.
+- Across ZIPs: the coefficient is positive in 4 of 5 random ZIP groups, and in both the north and south halves.
+- Conclusion: the signal is weak but directionally stable, so it is used as one of three ranking inputs, without a cap (rule: cap only when Q5 beats Q4 in fewer than 70% of years).
 
-### 6. Demo 排名的改动
+### 6. Demo ranking changes
 
-- 原版：`0.5 × CAI + 0.5 × P(活到回本)`。存续分被用了两次（CAI 里一次、回本概率里一次），而且回本概率假设每月的停业风险恒定。
-- 现在：先按预算筛选，再按供给缺口、基础情景回本月数、客流 −30% 时的月利润排名。存续估计单独展示，标为"1,000 天执照存续估计"。
-- 现场可以直接讲：某个商圈客流下降 30% 后会不会亏、亏多少，这个结果在 `stress_test` 字段里。
+- Before: `0.5 × CAI + 0.5 × P(survive to payback)`. The survival score was counted twice (once in CAI, once in the payback probability), and the payback probability assumed a constant monthly closure risk.
+- Now: filter by budget, then rank by supply gap, base-case payback months and monthly profit at −30% traffic. The survival estimate is shown separately, labeled "1,000-day license survival estimate."
+- A talking point for the demo: whether an area loses money if traffic drops 30%, and by how much. This is in the `stress_test` field.
 
-## 推荐引擎 `recommend.py`
+## Recommendation engine `recommend.py`
 
 ```bash
 python3 advantage/recommend.py --budget 350000 --cuisine asian
-python3 advantage/recommend.py --budget 250000 --cuisine fast_food --traffic 0.9 --food 1.15   # 自定义情景（压力测试会在此基础上再把客流乘以 0.7）
-python3 advantage/recommend.py --budget 250000 --cuisine fast_food --space second_gen           # 接手原有餐厅店面
+python3 advantage/recommend.py --budget 250000 --cuisine fast_food --traffic 0.9 --food 1.15   # Custom scenario (the stress test applies a further 0.7× traffic on top)
+python3 advantage/recommend.py --budget 250000 --cuisine fast_food --space second_gen           # Take over an existing restaurant space
 ```
 
-Python 调用：`from recommend import Engine; Engine().recommend(350_000, "asian")`，可选 `prior_licenses=`、`entity=` 用于重算存续估计（不影响排名）。输出 `output/recommend_<菜系>_<预算>.json`，地图图层 `output/map_<菜系>.geojson`：社区多边形带 `score`，ZIP 带 `gap_score`。
+From Python: `from recommend import Engine; Engine().recommend(350_000, "asian")`, with optional `prior_licenses=` and `entity=` to recompute the survival estimate (does not affect ranking). Output goes to `output/recommend_<cuisine>_<budget>.json`, and the map layer to `output/map_<cuisine>.geojson`: neighborhood polygons carry `score`, ZIPs carry `gap_score`.
 
-| 产品功能 | 实现 | 状态 |
+| Product feature | Implementation | Status |
 |---|---|---|
-| 1 智能选址 | 预算筛选 → 三项排名 → 前 5 名和理由；地图 GeoJSON | ✅ 只有 `rent_by_area.json` 里的 7 个社区（以及有实时租金的新区域）能算回本 |
-| 2 竞争分析 | 社区内同类店数量和密度、供给缺口、2018–2022 年同类店的 1,000 天执照存续率 | ✅ |
-| 3 客群匹配 | 人口、就业、相对全市的收入、18–39 岁占比、`fit_ratio` | ✅ 收入为 2008–2012 年数据 |
-| 4 投资回报 | `finance.calc`；`demand_index` 换成供给缺口，`income_index` 换成真实收入比 | ✅ 有实时价格数据时，客单价改用实际价格；网页另外给出"回本时执照仍有效的概率" |
-| 5 风险和压力测试 | finance 的三项检查 + 客流 −30% 情景；`--traffic`、`--food` 参数可以接前端滑块 | ✅ |
-| 6 AI 顾问报告 | Exa 抓取、实时入库、agent 工具接口 | ⚠️ 接口已做，报告生成未做 |
-| 7 咨询建议 | 新建与接手店面的回本对比（`space_comparison`） | ⚠️ 租约要点和证照清单未做 |
+| 1 Smart site selection | Budget filter → three-measure ranking → top 5 with reasons; map GeoJSON | ✅ Payback can only be computed for the 7 neighborhoods in `rent_by_area.json` (plus new areas with live rents) |
+| 2 Competition analysis | Count and density of same-type restaurants in the neighborhood, supply gap, 1,000-day license survival for same-type restaurants 2018–2022 | ✅ |
+| 3 Customer fit | Population, employment, income relative to the city, share aged 18–39, `fit_ratio` | ✅ Income is 2008–2012 data |
+| 4 Return on investment | `finance.calc`; `demand_index` replaced with supply gap, `income_index` replaced with actual income ratio | ✅ With live price data, the average ticket uses actual prices; the site also shows "probability the license is still active at payback" |
+| 5 Risk and stress testing | finance's three checks + −30% traffic scenario; `--traffic` and `--food` can be wired to frontend sliders | ✅ |
+| 6 AI advisor report | Exa fetch, live ingest, agent tool endpoints | ⚠️ Endpoints done, report generation not done |
+| 7 Advisory recommendations | Payback comparison of new build-out vs. taking over a space (`space_comparison`) | ⚠️ Lease checklist and permit checklist not done |
 
-## 实时数据与自我迭代（`live.py`、`exa_fetch.py`、`agent_api.py`）
+## Live data and self-iteration (`live.py`, `exa_fetch.py`, `agent_api.py`)
 
-| | 实时叠加（秒级） | 重新训练（约 1 分钟，加上下载约 2 分钟） |
+| | Live overlay (seconds) | Retraining (about 1 minute, plus about 2 minutes to download) |
 |---|---|---|
-| 触发 | agent 调用 `ingest_records` | `agent_api.py retrain`，可用 cron 每周跑 |
-| 作用 | 开店/关店改变供给计数和缺口；agent/人工租金（同一区域 ≥ 3 条）覆盖 finance 的值，遇到新 ZIP 会新增候选区，规则抽取的租金只作证据；价格（≥ 3 条）替换估算客单价；新闻附在结果里 | 重跑 step1 → 2 → 2b → 4 → 3。上线模型（`final_model`）的 Brier 必须优于常数基线；同一指标版本内，它的独立店 AUC 下降不超过 0.02、分类器准确率下降不超过 0.03。不满足就回滚 |
-| 记录 | 每条记录必须带 `source_url` | `model_registry.json`（含 `metric_version`，指标定义变了就重新设基线），`versions/` 保留最近 5 个版本 |
+| Trigger | Agent calls `ingest_records` | `agent_api.py retrain`, can run weekly via cron |
+| Effect | Openings/closures change supply counts and gaps; agent/manual rents (≥ 3 for the same area) override finance values and add a candidate area for a new ZIP, while rule-extracted rents are evidence only; prices (≥ 3) replace the estimated average ticket; news is attached to results | Reruns step1 → 2 → 2b → 4 → 3. The deployed model (`final_model`) must beat the constant baseline on Brier; within the same metric version, its independent AUC may drop by no more than 0.02 and classifier accuracy by no more than 0.03. Otherwise it rolls back |
+| Records | Every record must have a `source_url` | `model_registry.json` (includes `metric_version`; the baseline resets when metric definitions change); `versions/` keeps the last 5 versions |
 
-四类实时记录的字段定义见 `live.SCHEMAS`：`places`、`rents`、`prices`、`signals`。Exa 需要环境变量 `EXA_API_KEY`。正则只自动抽取租金和新闻；开店、关店、价格由 agent 读页面后抽取，再调用 `ingest_records`。命令：`agent_api.py fetch | ingest | recommend --live | retrain | status | tools`。用合成数据的测试：`python3 advantage/test_live.py`（含租金替换规则和可选经营者输入的检查）。
+Field definitions for the four live record kinds are in `live.SCHEMAS`: `places`, `rents`, `prices`, `signals`. Exa requires the `EXA_API_KEY` environment variable. Regex extracts only rents and news automatically; openings, closures and prices are extracted by an agent reading the page, which then calls `ingest_records`. Commands: `agent_api.py fetch | ingest | recommend --live | retrain | status | tools`. Tests with synthetic data: `python3 advantage/test_live.py` (includes checks for the rent replacement rule and optional operator inputs).
 
-## 时间对齐规则
+## Time alignment rules
 
-Y 年开业的样本（或回测中 Y 年 1 月 1 日的快照）只用 **Y−2 数据年**的 ZIP 特征：
+Openings in year Y (or the Jan 1 snapshot of year Y in the backtest) use only ZIP features from **data year Y−2**:
 
-| 特征 | 对齐方式 | 剩余问题 |
+| Feature | Alignment | Remaining issue |
 |---|---|---|
-| 就业（LODES） | 精确取 Y−2 年的数据 | 无 |
-| 竞争、连锁、菜系、ZIP 历史存续率 | t 时刻有效的执照记录，以及 t 之前已成熟的标签 | 无 |
-| 经营者经验、注册方式 | 同账户在 t 之前开始的其他执照；开业记录上的法人名 | 无 |
-| 地址历史 | 同地址在 t 之前 5 年内到期、过期 60 天未续的执照 | 续照延迟超过 60 天的会被误算为关店（step2b：执照中断占 0.2%） |
-| 人口和族裔结构 | 取 ≤ Y−2 年的最新值，**不回填** | 2018 年以前缺失。申请 `CENSUS_API_KEY` 改用 ACS 后可以补上 |
-| 社区收入（2008–2012） | 静态数据，早于所有开业 | ZIP→社区的权重用了全部年份的执照分布（影响很小） |
+| Employment (LODES) | Exactly year Y−2 | None |
+| Competition, chain, cuisine, ZIP historical survival | License records active at t, and labels matured before t | None |
+| Operator experience, entity type | Other licenses on the same account that started before t; legal name on the opening record | None |
+| Address history | Licenses at the same address that expired in the 5 years before t and were not renewed within 60 days | Renewals delayed more than 60 days are miscounted as closures (step2b: license gaps are 0.2%) |
+| Population and ethnic composition | Latest value ≤ Y−2, **no backfill** | Missing before 2018. Could be filled with ACS after obtaining a `CENSUS_API_KEY` |
+| Neighborhood income (2008–2012) | Static, predates all openings | ZIP → neighborhood weights use the license distribution across all years (minor effect) |
 
-## 输出文件（`output/`）
+## Output files (`output/`)
 
-- `license_spans.parquet`：每条执照记录的有效期、地址、名称、折外菜系概率
-- `survival_training_table.parquet`、`survival_model.pkl`（含校准参数和执照存续曲线）
-- `survival_points.parquet`、`survival_defaults.json`：step3 的抽样点和默认输入，供 `/api/survival` 按用户输入重算
-- `competitive_advantage_by_zip_cuisine.csv`：每个 ZIP × 菜系的 `gap_score`、`gap_z`、实际店数、预期店数、`p_license_1000d`，以及保留作参考的 CAI
-- `finance_by_area.csv`：7 个社区 × 4 类菜系，包括回本月数、客流 −30% 时的利润和存续估计
-- `step1_classifier_report.json`、`step1_closed_sample.csv`
-- `step2_survival_report.json`：包括每个测试年、合并结果、消融、原版表对比和校准
-- `step2b_label_audit.json`、`step2b_label_samples.csv`
-- `step4_backtest_report.json`：包括分年份、分 ZIP 组和南北两半的结果
-- `model_registry.json`、`versions/`
+- `license_spans.parquet`: validity period, address, name and out-of-fold cuisine probabilities for every license record
+- `survival_training_table.parquet`, `survival_model.pkl` (includes calibration parameters and the license survival curve)
+- `survival_points.parquet`, `survival_defaults.json`: step3 sample points and default inputs, used by `/api/survival` to recompute from user input
+- `competitive_advantage_by_zip_cuisine.csv`: for each ZIP × cuisine, `gap_score`, `gap_z`, actual count, expected count, `p_license_1000d`, plus CAI kept for reference
+- `finance_by_area.csv`: 7 neighborhoods × 4 cuisine types, including payback months, profit at −30% traffic, and survival estimate
+- `step1_classifier_report.json`, `step1_closed_sample.csv`
+- `step2_survival_report.json`: includes per-test-year, pooled, ablation, original-table comparison and calibration results
+- `step2b_label_audit.json`, `step2b_label_samples.csv`
+- `step4_backtest_report.json`: includes per-year, per-ZIP-group and north/south results
+- `model_registry.json`, `versions/`
 
-## 已知局限
+## Known limitations
 
-1. 存续模型信号偏弱，独立店时间外 AUC 约 0.61；标签和实际营业状态只有约 85% 一致。执照存续曲线反映的是执照两年一期的续期，不等于营业时长。
-2. 供给缺口是相似商圈对比得出的，不是需求；Loop、River North、Streeterville 的就业/人口比极高，这些地方属于外推。
-3. 只有 7 个社区有租金数据。其他区域要靠实时租金记录补上，才能算回本。
-4. 2018 年以前没有 ZIP 人口数据（缺 Census key）。
-5. 禁酒选区是 2011 年的历史数据，选区边界此后改过。
+1. The survival model's signal is weak: independent out-of-time AUC is about 0.61, and the label agrees with actual operating status only about 85% of the time. The license survival curve reflects two-year license renewals, not how long a restaurant operates.
+2. The supply gap comes from comparison with peer areas; it is not demand. Loop, River North and Streeterville have extremely high employment-to-population ratios, so estimates there are extrapolations.
+3. Only 7 neighborhoods have rent data. Other areas need live rent records before payback can be computed.
+4. No ZIP population data before 2018 (no Census key).
+5. Dry precincts are 2011 historical data, and precinct boundaries have changed since.
