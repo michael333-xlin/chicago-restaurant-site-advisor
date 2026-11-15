@@ -1,0 +1,19 @@
+# Weekly self-iteration: re-download city/federal data, retrain, promote only if not worse, re-export the web data.
+# Needs two repository secrets: PLATEGAP_URL (e.g. https://plategap.onrender.com) and PLATEGAP_ADMIN_TOKEN.
+name: weekly-refresh
+on:
+  schedule:
+    - cron: "0 9 * * 1"       # Mondays 09:00 UTC
+  workflow_dispatch: {}
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger retrain on the server
+        run: |
+          curl -fsS -X POST "$URL/api/admin/retrain" \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            -d '{"download": true}'
+        env:
+          URL: ${{ secrets.PLATEGAP_URL }}
+          TOKEN: ${{ secrets.PLATEGAP_ADMIN_TOKEN }}

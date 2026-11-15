@@ -1,0 +1,20 @@
+// Common neighborhood names for Chicago ZIP codes (display labels only; ZIPs cross neighborhood lines).
+export const ZIP_NAMES: Record<string, string> = {
+  '60601': 'Loop · New Eastside', '60602': 'Loop', '60603': 'Loop', '60604': 'Loop', '60605': 'South Loop',
+  '60606': 'West Loop · Financial District', '60607': 'West Loop · University Village', '60608': 'Pilsen · Bridgeport',
+  '60609': 'Back of the Yards · Canaryville', '60610': 'Old Town · Gold Coast', '60611': 'Streeterville',
+  '60612': 'Near West Side · Medical District', '60613': 'Lakeview · Wrigleyville', '60614': 'Lincoln Park',
+  '60615': 'Hyde Park · Kenwood', '60616': 'Chinatown · Near South Side', '60617': 'South Chicago · East Side',
+  '60618': 'Avondale · North Center', '60619': 'Chatham', '60620': 'Auburn Gresham', '60621': 'Englewood',
+  '60622': 'Wicker Park · Ukrainian Village', '60623': 'Little Village', '60624': 'Garfield Park',
+  '60625': 'Lincoln Square · Albany Park', '60626': 'Rogers Park', '60628': 'Roseland · Pullman',
+  '60629': 'Chicago Lawn · West Lawn', '60630': 'Jefferson Park', '60631': 'Norwood Park · Edison Park',
+  '60632': 'Brighton Park · Archer Heights', '60633': 'Hegewisch', '60634': 'Dunning · Belmont Cragin',
+  '60636': 'West Englewood', '60637': 'Woodlawn · Hyde Park', '60638': 'Garfield Ridge · Clearing',
+  '60639': 'Belmont Cragin · Hermosa', '60640': 'Uptown', '60641': 'Portage Park · Irving Park',
+  '60642': 'Noble Square · Goose Island', '60643': 'Beverly · Morgan Park', '60644': 'Austin',
+  '60645': 'West Ridge', '60646': 'Sauganash · Edgebrook', '60647': 'Logan Square', '60649': 'South Shore',
+  '60651': 'Humboldt Park', '60652': 'Ashburn', '60653': 'Bronzeville', '60654': 'River North',
+  '60655': 'Mount Greenwood', '60656': 'O’Hare · Norwood Park', '60657': 'Lakeview', '60659': 'West Ridge · North Park',
+  '60660': 'Edgewater', '60661': 'West Loop · Fulton River',
+}
